@@ -21,8 +21,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/p2p/enr"
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/teslapatrick/RPOC/p2p/enr"
+	"github.com/teslapatrick/RPOC/rlp"
 	"github.com/stretchr/testify/assert"
 )
 

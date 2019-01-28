@@ -35,12 +35,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/metrics"
-	"github.com/ethereum/go-ethereum/swarm/api"
-	"github.com/ethereum/go-ethereum/swarm/log"
-	"github.com/ethereum/go-ethereum/swarm/storage"
-	"github.com/ethereum/go-ethereum/swarm/storage/feed"
+	"github.com/teslapatrick/RPOC/common"
+	"github.com/teslapatrick/RPOC/metrics"
+	"github.com/teslapatrick/RPOC/swarm/api"
+	"github.com/teslapatrick/RPOC/swarm/log"
+	"github.com/teslapatrick/RPOC/swarm/storage"
+	"github.com/teslapatrick/RPOC/swarm/storage/feed"
 	"github.com/rs/cors"
 )
 

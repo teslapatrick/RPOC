@@ -31,12 +31,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/crypto/ecies"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/swarm/api"
-	swarmapi "github.com/ethereum/go-ethereum/swarm/api/client"
-	"github.com/ethereum/go-ethereum/swarm/testutil"
+	"github.com/teslapatrick/RPOC/crypto"
+	"github.com/teslapatrick/RPOC/crypto/ecies"
+	"github.com/teslapatrick/RPOC/log"
+	"github.com/teslapatrick/RPOC/swarm/api"
+	swarmapi "github.com/teslapatrick/RPOC/swarm/api/client"
+	"github.com/teslapatrick/RPOC/swarm/testutil"
 	"golang.org/x/crypto/sha3"
 )
 

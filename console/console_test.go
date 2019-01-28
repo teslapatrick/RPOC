@@ -26,12 +26,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/consensus/ethash"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/eth"
-	"github.com/ethereum/go-ethereum/internal/jsre"
-	"github.com/ethereum/go-ethereum/node"
+	"github.com/teslapatrick/RPOC/common"
+	"github.com/teslapatrick/RPOC/consensus/ethash"
+	"github.com/teslapatrick/RPOC/core"
+	"github.com/teslapatrick/RPOC/eth"
+	"github.com/teslapatrick/RPOC/internal/jsre"
+	"github.com/teslapatrick/RPOC/node"
 )
 
 const (

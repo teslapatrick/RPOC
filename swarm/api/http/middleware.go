@@ -7,11 +7,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ethereum/go-ethereum/metrics"
-	"github.com/ethereum/go-ethereum/swarm/api"
-	"github.com/ethereum/go-ethereum/swarm/log"
-	"github.com/ethereum/go-ethereum/swarm/sctx"
-	"github.com/ethereum/go-ethereum/swarm/spancontext"
+	"github.com/teslapatrick/RPOC/metrics"
+	"github.com/teslapatrick/RPOC/swarm/api"
+	"github.com/teslapatrick/RPOC/swarm/log"
+	"github.com/teslapatrick/RPOC/swarm/sctx"
+	"github.com/teslapatrick/RPOC/swarm/spancontext"
 	"github.com/pborman/uuid"
 )
 

@@ -26,9 +26,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/accounts"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/event"
+	"github.com/teslapatrick/RPOC/accounts"
+	"github.com/teslapatrick/RPOC/common"
+	"github.com/teslapatrick/RPOC/event"
 )
 
 var testSigData = make([]byte, 32)

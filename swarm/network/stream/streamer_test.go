@@ -25,11 +25,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/p2p/enode"
-	p2ptest "github.com/ethereum/go-ethereum/p2p/testing"
-	"github.com/ethereum/go-ethereum/swarm/network"
+	"github.com/teslapatrick/RPOC/common"
+	"github.com/teslapatrick/RPOC/log"
+	"github.com/teslapatrick/RPOC/p2p/enode"
+	p2ptest "github.com/teslapatrick/RPOC/p2p/testing"
+	"github.com/teslapatrick/RPOC/swarm/network"
 	"golang.org/x/crypto/sha3"
 )
 

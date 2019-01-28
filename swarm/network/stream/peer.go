@@ -23,14 +23,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ethereum/go-ethereum/metrics"
-	"github.com/ethereum/go-ethereum/p2p/protocols"
-	"github.com/ethereum/go-ethereum/swarm/log"
-	pq "github.com/ethereum/go-ethereum/swarm/network/priorityqueue"
-	"github.com/ethereum/go-ethereum/swarm/network/stream/intervals"
-	"github.com/ethereum/go-ethereum/swarm/spancontext"
-	"github.com/ethereum/go-ethereum/swarm/state"
-	"github.com/ethereum/go-ethereum/swarm/storage"
+	"github.com/teslapatrick/RPOC/metrics"
+	"github.com/teslapatrick/RPOC/p2p/protocols"
+	"github.com/teslapatrick/RPOC/swarm/log"
+	pq "github.com/teslapatrick/RPOC/swarm/network/priorityqueue"
+	"github.com/teslapatrick/RPOC/swarm/network/stream/intervals"
+	"github.com/teslapatrick/RPOC/swarm/spancontext"
+	"github.com/teslapatrick/RPOC/swarm/state"
+	"github.com/teslapatrick/RPOC/swarm/storage"
 	opentracing "github.com/opentracing/opentracing-go"
 )
 
