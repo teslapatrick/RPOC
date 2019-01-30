@@ -19,14 +19,16 @@ package clique
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/teslapatrick/RPOC/log"
-	"sort"
-
+	"github.com/hashicorp/golang-lru"
 	"github.com/teslapatrick/RPOC/common"
 	"github.com/teslapatrick/RPOC/core/types"
 	"github.com/teslapatrick/RPOC/ethdb"
+	"github.com/teslapatrick/RPOC/log"
 	"github.com/teslapatrick/RPOC/params"
-	"github.com/hashicorp/golang-lru"
+	"github.com/teslapatrick/RPOC/rlp"
+	"golang.org/x/crypto/sha3"
+	"math/big"
+	"sort"
 )
 
 // Vote represents a single vote that an authorized signer made to modify the
@@ -56,6 +58,8 @@ type Snapshot struct {
 	Recents map[uint64]common.Address   `json:"recents"` // Set of recent signers for spam protections
 	Votes   []*Vote                     `json:"votes"`   // List of votes cast in chronological order
 	Tally   map[common.Address]Tally    `json:"tally"`   // Current vote tally to avoid recalculating
+	// added
+	Credit map[common.Address]uint64    `json:"credit"`  // score miner's credit
 }
 
 // signersAscending implements the sort interface to allow sorting a list of addresses
@@ -77,6 +81,7 @@ func newSnapshot(config *params.CliqueConfig, sigcache *lru.ARCCache, number uin
 		Signers:  make(map[common.Address]struct{}),
 		Recents:  make(map[uint64]common.Address),
 		Tally:    make(map[common.Address]Tally),
+		Credit:   make(map[common.Address]uint64),
 	}
 	for _, signer := range signers {
 		snap.Signers[signer] = struct{}{}
@@ -120,6 +125,8 @@ func (s *Snapshot) copy() *Snapshot {
 		Recents:  make(map[uint64]common.Address),
 		Votes:    make([]*Vote, len(s.Votes)),
 		Tally:    make(map[common.Address]Tally),
+		// added
+		Credit:   make(map[common.Address]uint64),
 	}
 	for signer := range s.Signers {
 		cpy.Signers[signer] = struct{}{}
@@ -310,7 +317,45 @@ func (s *Snapshot) inturn(number uint64, signer common.Address) bool {
 	for offset < len(signers) && signers[offset] != signer {
 		offset++
 	}
-	log.Info("================>", "signer number", s.Number)
-	log.Info("================>", "signer", signer.String())
-	return (number % uint64(len(signers))) == uint64(offset)
+	//return (number % uint64(len(signers))) == uint64(offset)
+	return selectMiner(signersAscending(signers), s) == uint64(offset)
+}
+
+type Interface interface {
+	Len() int
+}
+
+type AddrSlice []common.Address
+
+func (a AddrSlice) Len() int {return len(a)}
+
+type Hash []byte
+
+func selectMiner(data Interface, s *Snapshot) uint64 {
+	n1 := data.Len()
+	log.Info("================>", "n1's len", n1)
+	log.Info("================>", "recentBlockHash", s.Hash)
+	recentHash := s.Hash
+	return doHash(n1, recentHash.Bytes(), s)
+
+}
+
+func doHash(l int, h Hash, s *Snapshot) uint64 {
+	rlphash := rlpHash(h)
+	log.Info("================>", "rlpHash", rlphash)
+
+	a := rlphash.Big()
+	b := big.NewInt(0)
+	b.Mod(a, big.NewInt(int64(l)))
+
+	log.Info("================>", "MOD", b)
+
+	return b.Uint64()
+}
+
+func rlpHash(x interface{}) (h common.Hash) {
+	hw := sha3.NewLegacyKeccak256()
+	rlp.Encode(hw, x)
+	hw.Sum(h[:0])
+	return h
 }
