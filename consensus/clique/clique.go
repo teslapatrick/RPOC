@@ -495,7 +495,9 @@ func (c *Clique) verifySeal(chain consensus.ChainReader, header *types.Header, p
 		if recent == signer {
 			// Signer is among recents, only fail if the current block doesn't shift it out
 			if limit := uint64(len(snap.Signers)/2 + 1); seen > number-limit {
-				return errRecentlySigned
+				log.Info("recently signed")
+				return nil
+				//return errRecentlySigned
 			}
 		}
 	}
@@ -633,9 +635,15 @@ func (c *Clique) Seal(chain consensus.ChainReader, block *types.Block, results c
 			// Signer is among recents, only wait if the current block doesn't shift it out
 			if limit := uint64(len(snap.Signers)/2 + 1); number < limit || seen > number-limit {
 				log.Info("Signed recently, must wait for others")
-				return nil
+				//return nil
 			}
 		}
+	}
+
+	// added
+	if block.Difficulty() == diffNoTurn {
+		log.Info("<<<<<<<<<<<<<< diff is 1, wait for the next turn")
+		return nil
 	}
 	// Sweet, the protocol permits us to sign the block, wait for our time
 	delay := time.Unix(header.Time.Int64(), 0).Sub(time.Now()) // nolint: gosimple
