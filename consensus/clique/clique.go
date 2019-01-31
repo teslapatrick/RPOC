@@ -548,7 +548,7 @@ func (c *Clique) Prepare(chain consensus.ChainReader, header *types.Header) erro
 	}
 	// Set the correct difficulty
 	header.Difficulty = CalcDifficulty(snap, c.signer)
-
+	log.Info("================", "Difficulty", header.Difficulty)
 	// Ensure the extra data has all it's components
 	if len(header.Extra) < extraVanity {
 		header.Extra = append(header.Extra, bytes.Repeat([]byte{0x00}, extraVanity-len(header.Extra))...)
@@ -628,7 +628,7 @@ func (c *Clique) Seal(chain consensus.ChainReader, block *types.Block, results c
 	}
 	// miner select is random
 	// If we're amongst the recent signers, wait for the next block
-	/*for seen, recent := range snap.Recents {
+	for seen, recent := range snap.Recents {
 		if recent == signer {
 			// Signer is among recents, only wait if the current block doesn't shift it out
 			if limit := uint64(len(snap.Signers)/2 + 1); number < limit || seen > number-limit {
@@ -636,15 +636,17 @@ func (c *Clique) Seal(chain consensus.ChainReader, block *types.Block, results c
 				return nil
 			}
 		}
-	}*/
+	}
 	// Sweet, the protocol permits us to sign the block, wait for our time
 	delay := time.Unix(header.Time.Int64(), 0).Sub(time.Now()) // nolint: gosimple
 	if header.Difficulty.Cmp(diffNoTurn) == 0 {
 		// It's not our turn explicitly to sign, delay it a bit
 		wiggle := time.Duration(len(snap.Signers)/2+1) * wiggleTime
 		delay += time.Duration(rand.Int63n(int64(wiggle)))
-
+		time.After(delay)
+		log.Info("<<<<<<<<<<<<<<<<<", "TimeAfter", delay)
 		log.Trace("Out-of-turn signing requested", "wiggle", common.PrettyDuration(wiggle))
+		return nil
 	}
 	// Sign all the things!
 	sighash, err := signFn(accounts.Account{Address: signer}, sigHash(header).Bytes())

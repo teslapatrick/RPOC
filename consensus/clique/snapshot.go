@@ -224,11 +224,12 @@ func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
 		if _, ok := snap.Signers[signer]; !ok {
 			return nil, errUnauthorizedSigner
 		}
-		for _, recent := range snap.Recents {
+		// recent signed allowed
+		/*for _, recent := range snap.Recents {
 			if recent == signer {
 				return nil, errRecentlySigned
 			}
-		}
+		}*/
 		snap.Recents[number] = signer
 
 		// Header authorized, discard any previous votes from the signer
@@ -317,6 +318,8 @@ func (s *Snapshot) inturn(number uint64, signer common.Address) bool {
 	for offset < len(signers) && signers[offset] != signer {
 		offset++
 	}
+	log.Info("================>", "signer[0]", signers[0])
+	//log.Info("================>", "signer[1]", signers[1])
 	//return (number % uint64(len(signers))) == uint64(offset)
 	return selectMiner(signersAscending(signers), s) == uint64(offset)
 }
@@ -336,15 +339,15 @@ func selectMiner(data Interface, s *Snapshot) uint64 {
 	log.Info("================>", "n1's len", n1)
 	log.Info("================>", "recentBlockHash", s.Hash)
 	recentHash := s.Hash
-	return doHash(n1, recentHash.Bytes(), s)
+	return doHash(n1, recentHash.Bytes())
 
 }
 
-func doHash(l int, h Hash, s *Snapshot) uint64 {
-	rlphash := rlpHash(h)
-	log.Info("================>", "rlpHash", rlphash)
+func doHash(l int, h Hash) uint64 {
+	rlpHash := rlpHash(h)
+	log.Info("================>", "rlpHash", rlpHash)
 
-	a := rlphash.Big()
+	a := rlpHash.Big()
 	b := big.NewInt(0)
 	b.Mod(a, big.NewInt(int64(l)))
 
