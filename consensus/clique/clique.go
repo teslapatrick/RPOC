@@ -25,6 +25,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/hashicorp/golang-lru"
 	"github.com/teslapatrick/RPOC/accounts"
 	"github.com/teslapatrick/RPOC/common"
 	"github.com/teslapatrick/RPOC/common/hexutil"
@@ -38,7 +39,6 @@ import (
 	"github.com/teslapatrick/RPOC/params"
 	"github.com/teslapatrick/RPOC/rlp"
 	"github.com/teslapatrick/RPOC/rpc"
-	lru "github.com/hashicorp/golang-lru"
 	"golang.org/x/crypto/sha3"
 )
 
@@ -719,3 +719,16 @@ func (c *Clique) APIs(chain consensus.ChainReader) []rpc.API {
 		Public:    false,
 	}}
 }
+
+/*// clear honesty points status.
+func ClsCheckpoint()  {
+	//if
+}
+
+func (c *Clique) generateTX(method string)  {
+	nonce := eth.Ethereum.TxPool().State().GetNonce(c.signer)
+	//nonce = eth.Ethereum.BlockChain()
+	tx := types.NewTransaction(nonce, MinerContractAddress, )
+
+
+}*/
