@@ -21,11 +21,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/consensus/ethash"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/teslapatrick/RPOC/consensus/ethash"
+	"github.com/teslapatrick/RPOC/core/types"
+	"github.com/teslapatrick/RPOC/core/vm"
+	"github.com/teslapatrick/RPOC/ethdb"
+	"github.com/teslapatrick/RPOC/params"
 )
 
 // Tests that simple header verification works, for both good and bad blocks.

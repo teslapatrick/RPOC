@@ -19,9 +19,9 @@ package protocols
 import (
 	"testing"
 
-	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/p2p/simulations/adapters"
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/teslapatrick/RPOC/p2p"
+	"github.com/teslapatrick/RPOC/p2p/simulations/adapters"
+	"github.com/teslapatrick/RPOC/rlp"
 )
 
 //dummy Balance implementation

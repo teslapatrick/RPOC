@@ -22,8 +22,8 @@ import (
 	"path/filepath"
 	"sync"
 
-	"github.com/ethereum/go-ethereum/p2p/enode"
-	"github.com/ethereum/go-ethereum/swarm/storage"
+	"github.com/teslapatrick/RPOC/p2p/enode"
+	"github.com/teslapatrick/RPOC/swarm/storage"
 )
 
 const (

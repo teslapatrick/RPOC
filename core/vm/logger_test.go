@@ -20,9 +20,9 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/state"
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/teslapatrick/RPOC/common"
+	"github.com/teslapatrick/RPOC/core/state"
+	"github.com/teslapatrick/RPOC/params"
 )
 
 type dummyContractRef struct {

@@ -31,9 +31,9 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/teslapatrick/RPOC/common"
+	"github.com/teslapatrick/RPOC/core"
+	"github.com/teslapatrick/RPOC/log"
 	"golang.org/x/crypto/ssh/terminal"
 )
 

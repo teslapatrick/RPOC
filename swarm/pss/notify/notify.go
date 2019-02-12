@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/rlp"
-	"github.com/ethereum/go-ethereum/swarm/log"
-	"github.com/ethereum/go-ethereum/swarm/pss"
+	"github.com/teslapatrick/RPOC/common/hexutil"
+	"github.com/teslapatrick/RPOC/crypto"
+	"github.com/teslapatrick/RPOC/p2p"
+	"github.com/teslapatrick/RPOC/rlp"
+	"github.com/teslapatrick/RPOC/swarm/log"
+	"github.com/teslapatrick/RPOC/swarm/pss"
 )
 
 const (

@@ -28,14 +28,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common/mclock"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/p2p/discv5"
-	"github.com/ethereum/go-ethereum/p2p/enode"
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/teslapatrick/RPOC/common/mclock"
+	"github.com/teslapatrick/RPOC/crypto"
+	"github.com/teslapatrick/RPOC/ethdb"
+	"github.com/teslapatrick/RPOC/log"
+	"github.com/teslapatrick/RPOC/p2p"
+	"github.com/teslapatrick/RPOC/p2p/discv5"
+	"github.com/teslapatrick/RPOC/p2p/enode"
+	"github.com/teslapatrick/RPOC/rlp"
 )
 
 const (

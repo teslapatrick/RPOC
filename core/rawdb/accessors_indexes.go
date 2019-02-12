@@ -17,10 +17,10 @@
 package rawdb
 
 import (
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/teslapatrick/RPOC/common"
+	"github.com/teslapatrick/RPOC/core/types"
+	"github.com/teslapatrick/RPOC/log"
+	"github.com/teslapatrick/RPOC/rlp"
 )
 
 // ReadTxLookupEntry retrieves the positional metadata associated with a transaction

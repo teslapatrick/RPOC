@@ -26,15 +26,15 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/ethereum/go-ethereum/accounts"
-	"github.com/ethereum/go-ethereum/accounts/keystore"
-	"github.com/ethereum/go-ethereum/accounts/usbwallet"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/p2p/enode"
-	"github.com/ethereum/go-ethereum/rpc"
+	"github.com/teslapatrick/RPOC/accounts"
+	"github.com/teslapatrick/RPOC/accounts/keystore"
+	"github.com/teslapatrick/RPOC/accounts/usbwallet"
+	"github.com/teslapatrick/RPOC/common"
+	"github.com/teslapatrick/RPOC/crypto"
+	"github.com/teslapatrick/RPOC/log"
+	"github.com/teslapatrick/RPOC/p2p"
+	"github.com/teslapatrick/RPOC/p2p/enode"
+	"github.com/teslapatrick/RPOC/rpc"
 )
 
 const (

@@ -21,10 +21,10 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/ethereum/go-ethereum/accounts/keystore"
-	"github.com/ethereum/go-ethereum/cmd/utils"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/teslapatrick/RPOC/accounts/keystore"
+	"github.com/teslapatrick/RPOC/cmd/utils"
+	"github.com/teslapatrick/RPOC/common"
+	"github.com/teslapatrick/RPOC/crypto"
 	"gopkg.in/urfave/cli.v1"
 )
 

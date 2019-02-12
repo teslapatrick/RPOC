@@ -23,9 +23,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/swarm/api"
-	"github.com/ethereum/go-ethereum/swarm/storage"
-	"github.com/ethereum/go-ethereum/swarm/storage/feed"
+	"github.com/teslapatrick/RPOC/swarm/api"
+	"github.com/teslapatrick/RPOC/swarm/storage"
+	"github.com/teslapatrick/RPOC/swarm/storage/feed"
 )
 
 type TestServer interface {

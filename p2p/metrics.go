@@ -25,11 +25,11 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/ethereum/go-ethereum/p2p/enode"
+	"github.com/teslapatrick/RPOC/p2p/enode"
 
-	"github.com/ethereum/go-ethereum/event"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/metrics"
+	"github.com/teslapatrick/RPOC/event"
+	"github.com/teslapatrick/RPOC/log"
+	"github.com/teslapatrick/RPOC/metrics"
 )
 
 const (

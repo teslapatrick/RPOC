@@ -38,12 +38,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/metrics"
-	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/rlp"
-	"github.com/ethereum/go-ethereum/swarm/spancontext"
-	"github.com/ethereum/go-ethereum/swarm/tracing"
+	"github.com/teslapatrick/RPOC/log"
+	"github.com/teslapatrick/RPOC/metrics"
+	"github.com/teslapatrick/RPOC/p2p"
+	"github.com/teslapatrick/RPOC/rlp"
+	"github.com/teslapatrick/RPOC/swarm/spancontext"
+	"github.com/teslapatrick/RPOC/swarm/tracing"
 	opentracing "github.com/opentracing/opentracing-go"
 )
 

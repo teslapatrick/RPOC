@@ -24,16 +24,16 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/bitutil"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/params"
-	"github.com/ethereum/go-ethereum/rlp"
-	"github.com/ethereum/go-ethereum/trie"
+	"github.com/teslapatrick/RPOC/common"
+	"github.com/teslapatrick/RPOC/common/bitutil"
+	"github.com/teslapatrick/RPOC/core"
+	"github.com/teslapatrick/RPOC/core/rawdb"
+	"github.com/teslapatrick/RPOC/core/types"
+	"github.com/teslapatrick/RPOC/ethdb"
+	"github.com/teslapatrick/RPOC/log"
+	"github.com/teslapatrick/RPOC/params"
+	"github.com/teslapatrick/RPOC/rlp"
+	"github.com/teslapatrick/RPOC/trie"
 )
 
 // IndexerConfig includes a set of configs for chain indexers.

@@ -19,8 +19,8 @@
 package whisperv6
 
 import (
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/teslapatrick/RPOC/common"
+	"github.com/teslapatrick/RPOC/common/hexutil"
 )
 
 // TopicType represents a cryptographically secure, probabilistic partial

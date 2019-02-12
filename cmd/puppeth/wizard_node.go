@@ -21,9 +21,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ethereum/go-ethereum/accounts/keystore"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/teslapatrick/RPOC/accounts/keystore"
+	"github.com/teslapatrick/RPOC/common"
+	"github.com/teslapatrick/RPOC/log"
 )
 
 // deployNode creates a new node configuration based on some user input.

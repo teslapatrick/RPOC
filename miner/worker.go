@@ -25,15 +25,15 @@ import (
 	"time"
 
 	mapset "github.com/deckarep/golang-set"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/consensus"
-	"github.com/ethereum/go-ethereum/consensus/misc"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/state"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/event"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/teslapatrick/RPOC/common"
+	"github.com/teslapatrick/RPOC/consensus"
+	"github.com/teslapatrick/RPOC/consensus/misc"
+	"github.com/teslapatrick/RPOC/core"
+	"github.com/teslapatrick/RPOC/core/state"
+	"github.com/teslapatrick/RPOC/core/types"
+	"github.com/teslapatrick/RPOC/event"
+	"github.com/teslapatrick/RPOC/log"
+	"github.com/teslapatrick/RPOC/params"
 )
 
 const (

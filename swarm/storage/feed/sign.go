@@ -19,8 +19,8 @@ package feed
 import (
 	"crypto/ecdsa"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/teslapatrick/RPOC/common"
+	"github.com/teslapatrick/RPOC/crypto"
 )
 
 const signatureLength = 65

@@ -21,13 +21,13 @@ import (
 	"math/big"
 	"sync"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/consensus/ethash"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/teslapatrick/RPOC/common"
+	"github.com/teslapatrick/RPOC/consensus/ethash"
+	"github.com/teslapatrick/RPOC/core"
+	"github.com/teslapatrick/RPOC/core/types"
+	"github.com/teslapatrick/RPOC/crypto"
+	"github.com/teslapatrick/RPOC/ethdb"
+	"github.com/teslapatrick/RPOC/params"
 )
 
 // Test chain parameters.

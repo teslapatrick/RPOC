@@ -20,8 +20,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/p2p/simulations"
+	"github.com/teslapatrick/RPOC/log"
+	"github.com/teslapatrick/RPOC/p2p/simulations"
 )
 
 // Package defaults.

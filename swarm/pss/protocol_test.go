@@ -25,10 +25,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/p2p/enode"
-	"github.com/ethereum/go-ethereum/swarm/log"
+	"github.com/teslapatrick/RPOC/common"
+	"github.com/teslapatrick/RPOC/p2p"
+	"github.com/teslapatrick/RPOC/p2p/enode"
+	"github.com/teslapatrick/RPOC/swarm/log"
 )
 
 type protoCtrl struct {

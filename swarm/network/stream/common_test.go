@@ -30,14 +30,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/p2p/enode"
-	p2ptest "github.com/ethereum/go-ethereum/p2p/testing"
-	"github.com/ethereum/go-ethereum/swarm/network"
-	"github.com/ethereum/go-ethereum/swarm/network/simulation"
-	"github.com/ethereum/go-ethereum/swarm/state"
-	"github.com/ethereum/go-ethereum/swarm/storage"
-	"github.com/ethereum/go-ethereum/swarm/testutil"
+	"github.com/teslapatrick/RPOC/log"
+	"github.com/teslapatrick/RPOC/p2p/enode"
+	p2ptest "github.com/teslapatrick/RPOC/p2p/testing"
+	"github.com/teslapatrick/RPOC/swarm/network"
+	"github.com/teslapatrick/RPOC/swarm/network/simulation"
+	"github.com/teslapatrick/RPOC/swarm/state"
+	"github.com/teslapatrick/RPOC/swarm/storage"
+	"github.com/teslapatrick/RPOC/swarm/testutil"
 	colorable "github.com/mattn/go-colorable"
 )
 

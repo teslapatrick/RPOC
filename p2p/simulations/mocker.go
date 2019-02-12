@@ -24,9 +24,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/p2p/enode"
-	"github.com/ethereum/go-ethereum/p2p/simulations/adapters"
+	"github.com/teslapatrick/RPOC/log"
+	"github.com/teslapatrick/RPOC/p2p/enode"
+	"github.com/teslapatrick/RPOC/p2p/simulations/adapters"
 )
 
 //a map of mocker names to its function

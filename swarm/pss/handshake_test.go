@@ -24,7 +24,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/swarm/log"
+	"github.com/teslapatrick/RPOC/swarm/log"
 )
 
 // asymmetrical key exchange between two directly connected peers

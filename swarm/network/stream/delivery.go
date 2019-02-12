@@ -21,12 +21,12 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/ethereum/go-ethereum/metrics"
-	"github.com/ethereum/go-ethereum/p2p/enode"
-	"github.com/ethereum/go-ethereum/swarm/log"
-	"github.com/ethereum/go-ethereum/swarm/network"
-	"github.com/ethereum/go-ethereum/swarm/spancontext"
-	"github.com/ethereum/go-ethereum/swarm/storage"
+	"github.com/teslapatrick/RPOC/metrics"
+	"github.com/teslapatrick/RPOC/p2p/enode"
+	"github.com/teslapatrick/RPOC/swarm/log"
+	"github.com/teslapatrick/RPOC/swarm/network"
+	"github.com/teslapatrick/RPOC/swarm/spancontext"
+	"github.com/teslapatrick/RPOC/swarm/storage"
 	opentracing "github.com/opentracing/opentracing-go"
 )
 

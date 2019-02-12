@@ -37,11 +37,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/metrics"
-	"github.com/ethereum/go-ethereum/swarm/api"
-	"github.com/ethereum/go-ethereum/swarm/spancontext"
-	"github.com/ethereum/go-ethereum/swarm/storage/feed"
+	"github.com/teslapatrick/RPOC/log"
+	"github.com/teslapatrick/RPOC/metrics"
+	"github.com/teslapatrick/RPOC/swarm/api"
+	"github.com/teslapatrick/RPOC/swarm/spancontext"
+	"github.com/teslapatrick/RPOC/swarm/storage/feed"
 	"github.com/pborman/uuid"
 )
 

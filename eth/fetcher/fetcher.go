@@ -22,11 +22,11 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/prque"
-	"github.com/ethereum/go-ethereum/consensus"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/teslapatrick/RPOC/common"
+	"github.com/teslapatrick/RPOC/common/prque"
+	"github.com/teslapatrick/RPOC/consensus"
+	"github.com/teslapatrick/RPOC/core/types"
+	"github.com/teslapatrick/RPOC/log"
 )
 
 const (

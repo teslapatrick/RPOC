@@ -25,15 +25,15 @@ import (
 	"math/big"
 	"reflect"
 
-	"github.com/ethereum/go-ethereum/accounts"
-	"github.com/ethereum/go-ethereum/accounts/keystore"
-	"github.com/ethereum/go-ethereum/accounts/usbwallet"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/internal/ethapi"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/teslapatrick/RPOC/accounts"
+	"github.com/teslapatrick/RPOC/accounts/keystore"
+	"github.com/teslapatrick/RPOC/accounts/usbwallet"
+	"github.com/teslapatrick/RPOC/common"
+	"github.com/teslapatrick/RPOC/common/hexutil"
+	"github.com/teslapatrick/RPOC/crypto"
+	"github.com/teslapatrick/RPOC/internal/ethapi"
+	"github.com/teslapatrick/RPOC/log"
+	"github.com/teslapatrick/RPOC/rlp"
 )
 
 // numberOfAccountsToDerive For hardware wallets, the number of accounts to derive
@@ -518,7 +518,7 @@ func (api *SignerAPI) SignTransaction(ctx context.Context, args SendTxArgs, meth
 //
 // The key used to calculate the signature is decrypted with the given password.
 //
-// https://github.com/ethereum/go-ethereum/wiki/Management-APIs#personal_sign
+// https://github.com/teslapatrick/RPOC/wiki/Management-APIs#personal_sign
 func (api *SignerAPI) Sign(ctx context.Context, addr common.MixedcaseAddress, data hexutil.Bytes) (hexutil.Bytes, error) {
 	sighash, msg := SignHash(data)
 	// We make the request prior to looking up if we actually have the account, to prevent

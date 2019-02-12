@@ -9,17 +9,17 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/node"
-	"github.com/ethereum/go-ethereum/p2p/enode"
-	"github.com/ethereum/go-ethereum/p2p/simulations"
-	"github.com/ethereum/go-ethereum/p2p/simulations/adapters"
-	"github.com/ethereum/go-ethereum/swarm/network"
-	"github.com/ethereum/go-ethereum/swarm/pss"
-	"github.com/ethereum/go-ethereum/swarm/state"
-	whisper "github.com/ethereum/go-ethereum/whisper/whisperv5"
+	"github.com/teslapatrick/RPOC/common/hexutil"
+	"github.com/teslapatrick/RPOC/crypto"
+	"github.com/teslapatrick/RPOC/log"
+	"github.com/teslapatrick/RPOC/node"
+	"github.com/teslapatrick/RPOC/p2p/enode"
+	"github.com/teslapatrick/RPOC/p2p/simulations"
+	"github.com/teslapatrick/RPOC/p2p/simulations/adapters"
+	"github.com/teslapatrick/RPOC/swarm/network"
+	"github.com/teslapatrick/RPOC/swarm/pss"
+	"github.com/teslapatrick/RPOC/swarm/state"
+	whisper "github.com/teslapatrick/RPOC/whisper/whisperv5"
 )
 
 var (

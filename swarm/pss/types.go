@@ -21,12 +21,12 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/rlp"
-	"github.com/ethereum/go-ethereum/swarm/storage"
-	whisper "github.com/ethereum/go-ethereum/whisper/whisperv5"
+	"github.com/teslapatrick/RPOC/common"
+	"github.com/teslapatrick/RPOC/common/hexutil"
+	"github.com/teslapatrick/RPOC/p2p"
+	"github.com/teslapatrick/RPOC/rlp"
+	"github.com/teslapatrick/RPOC/swarm/storage"
+	whisper "github.com/teslapatrick/RPOC/whisper/whisperv5"
 )
 
 const (

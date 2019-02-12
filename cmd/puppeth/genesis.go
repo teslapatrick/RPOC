@@ -23,12 +23,12 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	math2 "github.com/ethereum/go-ethereum/common/math"
-	"github.com/ethereum/go-ethereum/consensus/ethash"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/teslapatrick/RPOC/common"
+	"github.com/teslapatrick/RPOC/common/hexutil"
+	math2 "github.com/teslapatrick/RPOC/common/math"
+	"github.com/teslapatrick/RPOC/consensus/ethash"
+	"github.com/teslapatrick/RPOC/core"
+	"github.com/teslapatrick/RPOC/params"
 )
 
 // alethGenesisSpec represents the genesis specification format used by the

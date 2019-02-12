@@ -22,8 +22,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/ethereum/go-ethereum"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/teslapatrick/RPOC"
+	"github.com/teslapatrick/RPOC/common"
 )
 
 // Verify that Client implements the ethereum interfaces.

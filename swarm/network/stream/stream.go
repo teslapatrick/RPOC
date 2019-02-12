@@ -25,16 +25,16 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ethereum/go-ethereum/metrics"
-	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/p2p/enode"
-	"github.com/ethereum/go-ethereum/p2p/protocols"
-	"github.com/ethereum/go-ethereum/rpc"
-	"github.com/ethereum/go-ethereum/swarm/log"
-	"github.com/ethereum/go-ethereum/swarm/network"
-	"github.com/ethereum/go-ethereum/swarm/network/stream/intervals"
-	"github.com/ethereum/go-ethereum/swarm/state"
-	"github.com/ethereum/go-ethereum/swarm/storage"
+	"github.com/teslapatrick/RPOC/metrics"
+	"github.com/teslapatrick/RPOC/p2p"
+	"github.com/teslapatrick/RPOC/p2p/enode"
+	"github.com/teslapatrick/RPOC/p2p/protocols"
+	"github.com/teslapatrick/RPOC/rpc"
+	"github.com/teslapatrick/RPOC/swarm/log"
+	"github.com/teslapatrick/RPOC/swarm/network"
+	"github.com/teslapatrick/RPOC/swarm/network/stream/intervals"
+	"github.com/teslapatrick/RPOC/swarm/state"
+	"github.com/teslapatrick/RPOC/swarm/storage"
 )
 
 const (
