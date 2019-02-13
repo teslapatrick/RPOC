@@ -19,14 +19,13 @@ package clique
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/teslapatrick/RPOC/log"
 	"sort"
 
+	"github.com/hashicorp/golang-lru"
 	"github.com/teslapatrick/RPOC/common"
 	"github.com/teslapatrick/RPOC/core/types"
 	"github.com/teslapatrick/RPOC/ethdb"
 	"github.com/teslapatrick/RPOC/params"
-	"github.com/hashicorp/golang-lru"
 )
 
 // Vote represents a single vote that an authorized signer made to modify the
@@ -310,7 +309,5 @@ func (s *Snapshot) inturn(number uint64, signer common.Address) bool {
 	for offset < len(signers) && signers[offset] != signer {
 		offset++
 	}
-	log.Info("================>", "signer number", s.Number)
-	log.Info("================>", "signer", signer.String())
 	return (number % uint64(len(signers))) == uint64(offset)
 }

@@ -19,12 +19,14 @@ package miner
 import (
 	"bytes"
 	"errors"
+	"fmt"
+	"github.com/teslapatrick/RPOC/contracts/minerList"
 	"math/big"
 	"sync"
 	"sync/atomic"
 	"time"
 
-	mapset "github.com/deckarep/golang-set"
+	"github.com/deckarep/golang-set"
 	"github.com/teslapatrick/RPOC/common"
 	"github.com/teslapatrick/RPOC/consensus"
 	"github.com/teslapatrick/RPOC/consensus/misc"
@@ -176,6 +178,9 @@ type worker struct {
 	skipSealHook func(*task) bool                   // Method to decide whether skipping the sealing.
 	fullTaskHook func()                             // Method to call before pushing the full sealing task.
 	resubmitHook func(time.Duration, time.Duration) // Method to call upon updating resubmitting interval.
+
+	//minerlist
+	minerList *minerList.MinerList
 }
 
 func newWorker(config *params.ChainConfig, engine consensus.Engine, eth Backend, mux *event.TypeMux, recommit time.Duration, gasFloor, gasCeil uint64, isLocalBlock func(*types.Block) bool) *worker {
@@ -202,6 +207,7 @@ func newWorker(config *params.ChainConfig, engine consensus.Engine, eth Backend,
 		startCh:            make(chan struct{}, 1),
 		resubmitIntervalCh: make(chan time.Duration),
 		resubmitAdjustCh:   make(chan *intervalAdjust, resubmitAdjustChanSize),
+		minerList:          minerList.NewMinerList(),
 	}
 	// Subscribe NewTxsEvent for tx pool
 	worker.txsSub = eth.TxPool().SubscribeNewTxsEvent(worker.txsCh)
@@ -822,6 +828,7 @@ func (w *worker) commitNewWork(interrupt *int32, noempty bool, timestamp int64) 
 
 	tstart := time.Now()
 	parent := w.chain.CurrentBlock()
+	//log.Info("<><><><><><><><><><><><><><>new", "hash", parent.Hash().String())
 
 	if parent.Time().Cmp(new(big.Int).SetInt64(timestamp)) >= 0 {
 		timestamp = parent.Time().Int64() + 1
@@ -848,6 +855,14 @@ func (w *worker) commitNewWork(interrupt *int32, noempty bool, timestamp int64) 
 			return
 		}
 		header.Coinbase = w.coinbase
+
+		// added
+		log.Info("+++++++++++++++++++++++++++", "miner len", minerList.MinerLen(w.current.state))
+		//log.Info("+++++++++++++++++++++++++++", "miner list", w.minerList.GetMinerList(w.current.state))
+		w.minerList.GetMinerList(w.current.state)
+		selected := w.minerList.SelectMiner(parent.Hash())
+		fmt.Println(">>>>>>>>>>>>>><<<<<<<<<<<<", selected)
+
 	}
 	if err := w.engine.Prepare(w.chain, header); err != nil {
 		log.Error("Failed to prepare header for mining", "err", err)
