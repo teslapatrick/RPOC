@@ -883,7 +883,7 @@ func (w *worker) commitNewWork(interrupt *int32, noempty bool, timestamp int64) 
 		selected := w.minerList.SelectMiner(parent.Hash(), parent.Time(), whichEpoch)
 		fmt.Println(">>>>>>>>>>>>>><<<<<<<<<<<<", selected.String())
 
-		if selected != w.coinbase && header.Number.Int64() >= 2 {
+		if selected != w.coinbase && header.Number.Int64() >= 5 {
 
 			log.Info("===========================", "coinbase", w.coinbase)
 			log.Info("xxxxxxxxxxxxxxxxxxxxxxxxxxx", "error signer", selected.String())
