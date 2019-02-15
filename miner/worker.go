@@ -897,7 +897,7 @@ func (w *worker) commitNewWork(interrupt *int32, noempty bool, timestamp int64) 
 						break CYCLE
 					}
 				}
-				time.Sleep(800 * time.Millisecond)
+				time.Sleep(250 * time.Millisecond)
 				w.chainRPOCCh <- 1
 				return
 		}
