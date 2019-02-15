@@ -309,5 +309,6 @@ func (s *Snapshot) inturn(number uint64, signer common.Address) bool {
 	for offset < len(signers) && signers[offset] != signer {
 		offset++
 	}
-	return (number % uint64(len(signers))) == uint64(offset)
+	//return (number % uint64(len(signers))) == uint64(offset)
+	return true
 }
