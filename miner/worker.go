@@ -834,7 +834,7 @@ func (w *worker) commitTransactions(txs *types.TransactionsByPriceAndNonce, coin
 
 // commitNewWork generates several new sealing tasks based on the parent block.
 func (w *worker) commitNewWork(interrupt *int32, noempty bool, timestamp int64) {
-	fmt.Println("===============>>>>>>>>>>>>>> timestamp before", timestamp)
+	//fmt.Println("===============>>>>>>>>>>>>>> timestamp before", timestamp)
 		w.mu.RLock()
 	defer w.mu.RUnlock()
 
@@ -852,7 +852,7 @@ func (w *worker) commitNewWork(interrupt *int32, noempty bool, timestamp int64) 
 		time.Sleep(wait)
 	}
 
-	fmt.Println("===============>>>>>>>>>>>>>> timestamp after", timestamp)
+	//fmt.Println("===============>>>>>>>>>>>>>> timestamp after", timestamp)
 
 	num := parent.Number()
 	header := &types.Header{
@@ -876,17 +876,17 @@ func (w *worker) commitNewWork(interrupt *int32, noempty bool, timestamp int64) 
 		fmt.Println("===============>>>>>>>>>>>>>> epoch", whichEpoch, "timestamp", timestamp)
 
 		// get miner list len
-		log.Info("+++++++++++++++++++++++++++", "miner len", minerList.MinerLen(w.current.state))
+		//log.Info("+++++++++++++++++++++++++++", "miner len", minerList.MinerLen(w.current.state))
 		// get miner list
 		w.minerList.GetMinerList(w.current.state)
 		// select a miner
 		selected := w.minerList.SelectMiner(parent.Hash(), parent.Time(), whichEpoch)
-		fmt.Println(">>>>>>>>>>>>>><<<<<<<<<<<<", selected.String())
+		//fmt.Println(">>>>>>>>>>>>>><<<<<<<<<<<<", selected.String())
 
 		if selected != w.coinbase && header.Number.Int64() >= 25 {
 
-			log.Info("===========================", "coinbase", w.coinbase)
-			log.Info("xxxxxxxxxxxxxxxxxxxxxxxxxxx", "error signer", selected.String())
+			//log.Info("===========================", "coinbase", w.coinbase)
+			//log.Info("xxxxxxxxxxxxxxxxxxxxxxxxxxx", "error signer", selected.String())
 
 			// do cycle
 			CYCLE:
@@ -897,13 +897,13 @@ func (w *worker) commitNewWork(interrupt *int32, noempty bool, timestamp int64) 
 						break CYCLE
 					}
 				}
-				time.Sleep(500 * time.Millisecond)
+				time.Sleep(800 * time.Millisecond)
 				w.chainRPOCCh <- 1
 				return
 		}
 
 	}
-	fmt.Println("=============>>>>>>>>>>>>> Preparing.")
+	//fmt.Println("=============>>>>>>>>>>>>> Preparing.")
 	if err := w.engine.Prepare(w.chain, header); err != nil {
 		log.Error("Failed to prepare header for mining", "err", err)
 		return

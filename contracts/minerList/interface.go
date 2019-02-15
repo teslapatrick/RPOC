@@ -2,7 +2,6 @@ package minerList
 
 import (
 	"encoding/hex"
-	"fmt"
 	"github.com/teslapatrick/RPOC/common"
 	"github.com/teslapatrick/RPOC/core/state"
 	"github.com/teslapatrick/RPOC/crypto/sha3"
@@ -15,7 +14,7 @@ import (
 var MinerListContractAddress = common.HexToAddress("0x0665ae1f13f142ad585d32b101c98f531b78c80e")
 var KeyMinerLen = "0000000000000000000000000000000000000000000000000000000000000002"
 var SelectMod = float64(100) / 100
-var EpochTime = 5
+var EpochTime = 6
 
 
 type MinerList struct {
@@ -61,7 +60,7 @@ func (ml *MinerList) UpdateMinerListSnap(state *state.StateDB) {
 
 	// store miner in the list
 	for _, m := range minerList {
-		log.Info("==================>", "m:", m)
+		//log.Info("==================>", "m:", m)
 		ml.isRegistered[m] = true
 	}
 }
@@ -85,7 +84,7 @@ func (ml *MinerList) GetMinerList(state *state.StateDB) []common.Address {
 	for i:=int64(0); i<MinerLen.Int64(); i++ {
 		HashMinerLen := CalculateStateDbIndex(KeyMinerLen, "")
 		m := common.BytesToAddress(state.GetState(MinerListContractAddress, common.HexToHash(IncreaseHexByNum(HashMinerLen, i))).Bytes())
-		fmt.Println(">>>>>>>>>>>>>>>getMinerList", m.String())
+		//fmt.Println(">>>>>>>>>>>>>>>getMinerList", m.String())
 		ml.minerList = append(ml.minerList, m)
 		minerList    = append(minerList, m)
 	}
@@ -123,7 +122,7 @@ func (ml *MinerList) sortMinerList() []common.Address {
 func (ml *MinerList) SelectMiner(preHash common.Hash, preTime *big.Int, epoch int64) common.Address {
 	sorted := ml.sortMinerList()
 	for i:=int(0); i<len(sorted); i++ {
-		fmt.Println(">>>>>>>>>>>>>>>SelectMiner", sorted[i].String())
+		//fmt.Println(">>>>>>>>>>>>>>>SelectMiner", sorted[i].String())
 	}
 	//gen rand seed
 	randSeed := float64(len(sorted)) * SelectMod
