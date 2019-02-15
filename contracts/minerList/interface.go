@@ -12,14 +12,18 @@ import (
 	"sort"
 )
 
-var MinerListContractAddress = common.HexToAddress("0x0c24077fb5b317013e4689f685f59dad26e1ac47")
+var MinerListContractAddress = common.HexToAddress("0x36a84BfdDD2A14BB270BCf7b8F3506A672F8CdCB")
 var KeyMinerLen = "0000000000000000000000000000000000000000000000000000000000000002"
 var SelectMod = float64(100) / 100
+var EpochTime = 5
+
 
 type MinerList struct {
 	isRegistered map[common.Address]bool
 	honesty      map[common.Address]int
 	minerList    []common.Address
+	epoch        int32
+	selected     common.Address
 }
 
 type pair struct {
@@ -116,28 +120,31 @@ func (ml *MinerList) sortMinerList() []common.Address {
 }
 
 // rand a miner from current miner list
-func (ml * MinerList) SelectMiner(preHeaderHash common.Hash) int64 {
+func (ml *MinerList) SelectMiner(preHash common.Hash, preTime *big.Int, epoch int64) common.Address {
 	sorted := ml.sortMinerList()
 	for i:=int(0); i<len(sorted); i++ {
 		fmt.Println(">>>>>>>>>>>>>>>SelectMiner", sorted[i].String())
 	}
-
-	//
+	//gen rand seed
 	randSeed := float64(len(sorted)) * SelectMod
-	log.Info("================>", "randSeed", randSeed)
 	if randSeed == 0 {
-		return -1
+		return common.Address{}
 	}
-	// rlp hash
-	rlpHash := rlpHash(preHeaderHash)
-	log.Info("================>", "rlpHash", rlpHash)
+	// cycle
+	tempHash := preHash
+	var h common.Hash
+	for i:=int64(0); i<=epoch; i++ {
+		// rlp hash
+		h = rlpHash(tempHash)
+		tempHash = h
+	}
 
-	rlpHashBig := rlpHash.Big()
+	// selected
+	rlpHashBig := h.Big()
 	selected := big.NewInt(0)
-
 	selected.Mod(rlpHashBig, big.NewInt(int64(randSeed)))
-	log.Info("================>", "selected", selected)
-	return selected.Int64()
+	log.Info("================>", "selected index", selected)
+	return sorted[selected.Int64()]
 }
 
 // calculate the statedb index from key and parameter

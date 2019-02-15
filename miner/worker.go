@@ -140,6 +140,9 @@ type worker struct {
 	chainHeadSub event.Subscription
 	chainSideCh  chan core.ChainSideEvent
 	chainSideSub event.Subscription
+	// added
+	chainRPOCCh  chan core.ChainRPOCEvent
+	ChainRPOCSub event.Subscription
 
 	// Channels
 	newWorkCh          chan *newWorkReq
@@ -200,6 +203,8 @@ func newWorker(config *params.ChainConfig, engine consensus.Engine, eth Backend,
 		txsCh:              make(chan core.NewTxsEvent, txChanSize),
 		chainHeadCh:        make(chan core.ChainHeadEvent, chainHeadChanSize),
 		chainSideCh:        make(chan core.ChainSideEvent, chainSideChanSize),
+		// added
+		chainRPOCCh:        make(chan core.ChainRPOCEvent, 1),
 		newWorkCh:          make(chan *newWorkReq),
 		taskCh:             make(chan *task),
 		resultCh:           make(chan *types.Block, resultQueueSize),
@@ -214,6 +219,7 @@ func newWorker(config *params.ChainConfig, engine consensus.Engine, eth Backend,
 	// Subscribe events for blockchain
 	worker.chainHeadSub = eth.BlockChain().SubscribeChainHeadEvent(worker.chainHeadCh)
 	worker.chainSideSub = eth.BlockChain().SubscribeChainSideEvent(worker.chainSideCh)
+	worker.ChainRPOCSub  = eth.BlockChain().SubscribeChainRPOCEvent(worker.chainRPOCCh)
 
 	// Sanitize recommit interval if the user-specified one is too short.
 	if recommit < minRecommitInterval {
@@ -414,6 +420,11 @@ func (w *worker) mainLoop() {
 		select {
 		case req := <-w.newWorkCh:
 			w.commitNewWork(req.interrupt, req.noempty, req.timestamp)
+
+		case <- w.chainRPOCCh:
+			interrupt := new(int32)
+			atomic.StoreInt32(interrupt, 1)
+			w.commitNewWork(interrupt, false, time.Now().Unix())
 
 		case ev := <-w.chainSideCh:
 			// Short circuit for duplicate side blocks
@@ -823,7 +834,8 @@ func (w *worker) commitTransactions(txs *types.TransactionsByPriceAndNonce, coin
 
 // commitNewWork generates several new sealing tasks based on the parent block.
 func (w *worker) commitNewWork(interrupt *int32, noempty bool, timestamp int64) {
-	w.mu.RLock()
+	fmt.Println("===============>>>>>>>>>>>>>> timestamp before", timestamp)
+		w.mu.RLock()
 	defer w.mu.RUnlock()
 
 	tstart := time.Now()
@@ -839,6 +851,8 @@ func (w *worker) commitNewWork(interrupt *int32, noempty bool, timestamp int64) 
 		log.Info("Mining too far in the future", "wait", common.PrettyDuration(wait))
 		time.Sleep(wait)
 	}
+
+	fmt.Println("===============>>>>>>>>>>>>>> timestamp after", timestamp)
 
 	num := parent.Number()
 	header := &types.Header{
@@ -857,13 +871,39 @@ func (w *worker) commitNewWork(interrupt *int32, noempty bool, timestamp int64) 
 		header.Coinbase = w.coinbase
 
 		// added
+		// prepare data
+		whichEpoch := (header.Time.Int64() - parent.Time().Int64()) / int64(minerList.EpochTime)
+		fmt.Println("===============>>>>>>>>>>>>>> epoch", whichEpoch, "timestamp", timestamp)
+
+		// get miner list len
 		log.Info("+++++++++++++++++++++++++++", "miner len", minerList.MinerLen(w.current.state))
-		//log.Info("+++++++++++++++++++++++++++", "miner list", w.minerList.GetMinerList(w.current.state))
+		// get miner list
 		w.minerList.GetMinerList(w.current.state)
-		selected := w.minerList.SelectMiner(parent.Hash())
-		fmt.Println(">>>>>>>>>>>>>><<<<<<<<<<<<", selected)
+		// select a miner
+		selected := w.minerList.SelectMiner(parent.Hash(), parent.Time(), whichEpoch)
+		fmt.Println(">>>>>>>>>>>>>><<<<<<<<<<<<", selected.String())
+
+		if selected != w.coinbase {
+
+			log.Info("===========================", "coinbase", w.coinbase)
+			log.Info("xxxxxxxxxxxxxxxxxxxxxxxxxxx", "error signer", selected.String())
+
+			// do cycle
+			CYCLE:
+				for {
+					select {
+					case <- w.chainRPOCCh:
+					default:
+						break CYCLE
+					}
+				}
+				time.Sleep(500 * time.Millisecond)
+				w.chainRPOCCh <- 1
+				return
+		}
 
 	}
+	fmt.Println("=============>>>>>>>>>>>>> Preparing.")
 	if err := w.engine.Prepare(w.chain, header); err != nil {
 		log.Error("Failed to prepare header for mining", "err", err)
 		return

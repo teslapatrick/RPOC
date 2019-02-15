@@ -104,6 +104,9 @@ type BlockChain struct {
 	chainFeed     event.Feed
 	chainSideFeed event.Feed
 	chainHeadFeed event.Feed
+	// added
+	chainRPOCFeed event.Feed
+
 	logsFeed      event.Feed
 	scope         event.SubscriptionScope
 	genesisBlock  *types.Block
@@ -1716,4 +1719,8 @@ func (bc *BlockChain) SubscribeChainSideEvent(ch chan<- ChainSideEvent) event.Su
 // SubscribeLogsEvent registers a subscription of []*types.Log.
 func (bc *BlockChain) SubscribeLogsEvent(ch chan<- []*types.Log) event.Subscription {
 	return bc.scope.Track(bc.logsFeed.Subscribe(ch))
+}
+
+func (bc *BlockChain) SubscribeChainRPOCEvent(ch chan<- ChainRPOCEvent) event.Subscription {
+	return bc.scope.Track(bc.chainRPOCFeed.Subscribe(ch))
 }
