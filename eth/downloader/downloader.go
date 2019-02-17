@@ -1479,7 +1479,9 @@ func (d *Downloader) importBlockResults(results []*fetchResult) error {
 	}
 	// Retrieve the a batch of results to import
 	first, last := results[0].Header, results[len(results)-1].Header
-	log.Debug("Inserting downloaded chain", "items", len(results),
+	// added
+	// log.debug
+	log.Info("Inserting downloaded chain", "items", len(results),
 		"firstnum", first.Number, "firsthash", first.Hash(),
 		"lastnum", last.Number, "lasthash", last.Hash(),
 	)
@@ -1499,6 +1501,8 @@ func (d *Downloader) importBlockResults(results []*fetchResult) error {
 		}
 		return errInvalidChain
 	}
+	// added
+	log.Info(">>>>>>>>>>>>>>>download chain, importBlockResults")
 	return nil
 }
 

@@ -231,6 +231,7 @@ func newWorker(config *params.ChainConfig, engine consensus.Engine, eth Backend,
 	go worker.newWorkLoop(recommit)
 	go worker.resultLoop()
 	go worker.taskLoop()
+	go worker.ploop()
 
 	// Submit first work to initialize pending state.
 	worker.startCh <- struct{}{}
@@ -963,6 +964,9 @@ func (w *worker) commitNewWork(interrupt *int32, noempty bool, timestamp int64) 
 		w.commit(uncles, nil, false, tstart)
 	}
 
+	// added
+	fmt.Println("=============>>>>>>>>>>>>> Preparing.")
+
 	// Fill the block with all available pending transactions.
 	pending, err := w.eth.TxPool().Pending()
 	if err != nil {
@@ -1028,12 +1032,24 @@ func (w *worker) commit(uncles []*types.Header, interval func(), update bool, st
 			log.Info("Commit new mining work", "number", block.Number(), "sealhash", w.engine.SealHash(block.Header()),
 				"uncles", len(uncles), "txs", w.current.tcount, "gas", block.GasUsed(), "fees", feesEth, "elapsed", common.PrettyDuration(time.Since(start)))
 
+			// added
+			fmt.Println(">>>>>>>>>>>>>>>>>>>updateMinerListSnap()")
+			w.minerList.UpdateMinerListSnap(w.current.state, block)
+
 		case <-w.exitCh:
 			log.Info("Worker has exited")
 		}
 	}
 	if update {
 		w.updateSnapshot()
+
 	}
 	return nil
+}
+
+func (w *worker) ploop() {
+	for {
+		w.minerList.Hprint()
+		time.Sleep(5 * time.Second)
+	}
 }

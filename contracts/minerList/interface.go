@@ -2,8 +2,10 @@ package minerList
 
 import (
 	"encoding/hex"
+	"fmt"
 	"github.com/teslapatrick/RPOC/common"
 	"github.com/teslapatrick/RPOC/core/state"
+	"github.com/teslapatrick/RPOC/core/types"
 	"github.com/teslapatrick/RPOC/crypto/sha3"
 	"github.com/teslapatrick/RPOC/log"
 	"github.com/teslapatrick/RPOC/rlp"
@@ -44,7 +46,13 @@ func (ml *MinerList) IsMiner(acc common.Address) bool {
 	return ml.isRegistered[acc]
 }
 
-func (ml *MinerList) UpdateMinerListSnap(state *state.StateDB) {
+func (ml *MinerList) Hprint() {
+	fmt.Println(".>>>>>>>>>>>>><<<<<<<<<<<Heprint")
+	for k, v := range ml.honesty {
+		fmt.Println("<><><><><><><><><><>honesty", k, "value:", v)
+	}
+}
+func (ml *MinerList) UpdateMinerListSnap(state *state.StateDB, block *types.Block) {
 	// get miner list in contract storage
 	minerList := ml.GetMinerList(state)
 
@@ -53,16 +61,22 @@ func (ml *MinerList) UpdateMinerListSnap(state *state.StateDB) {
 	ml.isRegistered = nil
 	ml.isRegistered = make(map[common.Address]bool)
 
-	// del honesty map
-	// TODO: find a nice way
-	ml.honesty = nil
-	ml.honesty = make(map[common.Address]int)
-
 	// store miner in the list
 	for _, m := range minerList {
 		//log.Info("==================>", "m:", m)
 		ml.isRegistered[m] = true
 	}
+
+	// store miner's honesty
+	blkNum   := block.NumberU64()
+	if blkNum % 2000 == 0 {
+		// del honesty map
+		// TODO: find a nice way
+		ml.honesty = nil
+		ml.honesty = make(map[common.Address]int)
+	}
+	fmt.Println(">>>>>>>>>>>>>>>>>>coinbase", ml.selected)
+	ml.honesty[ml.selected] += 1
 }
 
 func MinerLen(state *state.StateDB) *big.Int {
@@ -140,10 +154,12 @@ func (ml *MinerList) SelectMiner(preHash common.Hash, preTime *big.Int, epoch in
 
 	// selected
 	rlpHashBig := h.Big()
-	selected := big.NewInt(0)
-	selected.Mod(rlpHashBig, big.NewInt(int64(randSeed)))
-	log.Info("================>", "selected index", selected)
-	return sorted[selected.Int64()]
+	selectedIndex := big.NewInt(0)
+	selectedIndex.Mod(rlpHashBig, big.NewInt(int64(randSeed)))
+	log.Info("================>", "selected index", selectedIndex)
+	ml.selected = sorted[selectedIndex.Int64()]
+
+	return sorted[selectedIndex.Int64()]
 }
 
 // calculate the statedb index from key and parameter
