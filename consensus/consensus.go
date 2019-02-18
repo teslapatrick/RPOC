@@ -107,7 +107,7 @@ type Engine interface {
 	Close() error
 
 	// update honesty
-	UpdateHonesty(needInit bool, coinbase common.Address)
+	UpdateHonesty(needInit bool, coinbase common.Address, blkHash common.Hash)
 
 	GetHonesty() map[common.Address]int
 }

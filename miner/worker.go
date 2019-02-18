@@ -234,7 +234,6 @@ func newWorker(config *params.ChainConfig, engine consensus.Engine, eth Backend,
 	go worker.newWorkLoop(recommit)
 	go worker.resultLoop()
 	go worker.taskLoop()
-	go worker.ploop()
 
 	// Submit first work to initialize pending state.
 	worker.startCh <- struct{}{}
@@ -875,15 +874,19 @@ func (w *worker) commitNewWork(interrupt *int32, noempty bool, timestamp int64) 
 		header.Coinbase = w.coinbase
 
 		// added
+
+
+
 		// prepare data
 		whichEpoch := (header.Time.Int64() - parent.Time().Int64()) / int64(minerList.EpochTime)
-		fmt.Println("===============>>>>>>>>>>>>>> epoch", whichEpoch, "timestamp", timestamp)
+		//fmt.Println("===============>>>>>>>>>>>>>> epoch", whichEpoch, "timestamp", timestamp)
 		// get miner list
 		w.minerList.GetMinerList(w.current.state)
 		// select a miner
 		parentSigner, _ := ecrecover(parent.Header())
+		fmt.Println(">>>>>>>>>>>>>><<<<<<<<<<<<w.engine.GetHonesty()Before", w.engine.GetHonesty())
 		selected := w.minerList.SelectMiner(parent.Hash(), whichEpoch, w.engine.GetHonesty(), parentSigner)
-		//fmt.Println(">>>>>>>>>>>>>><<<<<<<<<<<<", selected.String())
+		fmt.Println(">>>>>>>>>>>>>><<<<<<<<<<<<w.engine.GetHonesty()", w.engine.GetHonesty())
 
 
 		if selected != w.coinbase && header.Number.Int64() >= 25{
@@ -1030,8 +1033,8 @@ func (w *worker) commit(uncles []*types.Header, interval func(), update bool, st
 
 			// added
 			fmt.Println(">>>>>>>>>>>>>>>>>>>updateMinerListSnap()")
-			w.minerList.UpdateMinerListSnap()
-			w.engine.UpdateHonesty(false, w.coinbase)
+			w.minerList.UpdateMinerListSnap(w.current.state)
+			w.engine.UpdateHonesty(false, w.coinbase, block.Hash())
 
 		case <-w.exitCh:
 			log.Info("Worker has exited")
@@ -1041,16 +1044,6 @@ func (w *worker) commit(uncles []*types.Header, interval func(), update bool, st
 		w.updateSnapshot()
 	}
 	return nil
-}
-
-func (w *worker) ploop() {
-	for {
-		for k, v := range w.engine.GetHonesty() {
-			fmt.Println("+++++++++++++++++++ address", k.String(), "value", v)
-		}
-
-		time.Sleep(5 * time.Second)
-	}
 }
 
 // ecrecover extracts the Ethereum account address from a signed header.

@@ -216,8 +216,8 @@ type Clique struct {
 	fakeDiff bool // Skip difficulty verifications
 
 	// added
-	honesty map[common.Address]int
-	lastAdded common.Address
+	honest map[common.Address]int
+	lastAdded map[common.Hash]bool
 }
 
 // New creates a Clique proof-of-authority consensus engine with the initial
@@ -238,7 +238,8 @@ func New(config *params.CliqueConfig, db ethdb.Database) *Clique {
 		recents:    recents,
 		signatures: signatures,
 		proposals:  make(map[common.Address]bool),
-		honesty:    make(map[common.Address]int),
+		honest:    make(map[common.Address]int),
+		lastAdded:  make(map[common.Hash]bool),
 	}
 }
 
@@ -338,23 +339,28 @@ func (c *Clique) verifyHeader(chain consensus.ChainReader, header *types.Header,
 }
 
 // added
-func (c *Clique) UpdateHonesty(needInit bool, coinbase common.Address){
+func (c *Clique) UpdateHonesty(needInit bool, signer common.Address, blkHash common.Hash){
 	if needInit {
 		//epoch := c.config.Epoch
 		//lastBlock =
 	}
 
-	if c.lastAdded == coinbase {
+	if c.lastAdded[blkHash] {
+		fmt.Println("><<<<<<<<<<<<<<<<<<recently added")
 		return
 	}
-	c.honesty[coinbase] += 1
-	c.lastAdded = coinbase
+	fmt.Println("~~~~~~~~~~~~~~~~~~~~~~ add honesty", signer.String())
+	fmt.Println("+++++++++++++++++++++honesty in clique consensus BEFORE", c.honest)
+	c.honest[signer] += int(1)
+	c.lastAdded[blkHash] = true
+
+	fmt.Println("+++++++++++++++++++++honesty in clique consensus", c.honest)
+
 }
 
 func (c *Clique) GetHonesty() map[common.Address]int {
-	return c.honesty
+	return c.honest
 }
-
 
 // verifyCascadingFields verifies all the header fields that are not standalone,
 // rather depend on a batch of previous headers. The caller may optionally pass
@@ -538,11 +544,15 @@ func (c *Clique) verifySeal(chain consensus.ChainReader, header *types.Header, p
 
 	// added
 	if number % c.config.Epoch == 0 {
+		// init honesty
 		c.honesty = nil
 		c.honesty = make(map[common.Address]int)
+		// init lastadded
+		c.lastAdded = nil
+		c.lastAdded = make(map[common.Hash]bool)
+		fmt.Println("initinitinitinitinitinit")
 	} else {
-		fmt.Println("~~~~~~~~~~~~~~~~~~~~~~ add honesty", signer.String(), "blknumber", header.Number)
-		c.UpdateHonesty(false, signer)
+		c.UpdateHonesty(false, signer, header.Hash())
 	}
 
 	return nil

@@ -2,11 +2,8 @@ package minerList
 
 import (
 	"encoding/hex"
-	"errors"
 	"github.com/teslapatrick/RPOC/common"
 	"github.com/teslapatrick/RPOC/core/state"
-	"github.com/teslapatrick/RPOC/core/types"
-	"github.com/teslapatrick/RPOC/crypto"
 	"github.com/teslapatrick/RPOC/log"
 	"github.com/teslapatrick/RPOC/rlp"
 	//"github.com/teslapatrick/RPOC/crypto/sha3"
@@ -48,12 +45,12 @@ func (ml *MinerList) IsMiner(acc common.Address) bool {
 	return ml.isRegistered[acc]
 }
 
-func (ml *MinerList) UpdateMinerListSnap() {
+func (ml *MinerList) UpdateMinerListSnap(state *state.StateDB) {
 	// get miner list in contract storage
 	if len(ml.minerList) == 0 {
 		return
 	}
-	minerList := ml.minerList
+	minerList := ml.GetMinerList(state)
 
 	// del reg map
 	// TODO: find a nice way
@@ -73,10 +70,8 @@ func MinerLen(state *state.StateDB) *big.Int {
 
 func (ml *MinerList) GetMinerList(state *state.StateDB) []common.Address {
 	minerList := make([]common.Address, 0)
-	// del minerlist map
+	// del miner list map
 	ml.minerList = ml.minerList[0:0]
-
-
 	// get miner list len
 	MinerLen := MinerLen(state)
 	 if MinerLen == big.NewInt(0) {
@@ -97,14 +92,14 @@ func (p Pair) Len() int { return len(p) }
 func (p Pair) Less(i, j int) bool { return p[i].value < p[j].value }
 func (p Pair) Swap(i, j int) { p[i], p[j] = p[j], p[i] }
 
-func (ml *MinerList) SortMinerList(honesty map[common.Address]int, parentSigner common.Address) []common.Address {
+func (ml *MinerList) SortMinerList(honesty map[common.Address]int, signer common.Address) []common.Address {
 	miners := ml.minerList
 
 	// del parent signer
 	for i:=int(0);i<len(miners);i++  {
-		if miners[i] == parentSigner {
+		if miners[i] == signer {
 			miners = append(miners[:i], miners[i+1:]...)
-			delete(honesty, parentSigner)
+			delete(honesty, signer)
 		}
 	}
 
@@ -187,7 +182,7 @@ func (ml *MinerList) SelectMiner(preHash common.Hash, epoch int64, honesty map[c
 	selectedIndex := big.NewInt(0)
 	selectedIndex.Mod(rlpHashBig, big.NewInt(int64(randSeed)))
 	ml.selected = sorted[selectedIndex.Int64()]
-	log.Info("================>", "selected", ml.selected)
+	//log.Info("================>", "selected", ml.selected)
 	return ml.selected
 
 }
@@ -223,50 +218,4 @@ func rlpHash(x interface{}) (h common.Hash) {
 	rlp.Encode(hw, x)
 	hw.Sum(h[:0])
 	return h
-}
-
-
-var (
-	extraSeal = 65
-)
-// ecrecover extracts the Ethereum account address from a signed header.
-func ecrecover(header *types.Header) (common.Address, error) {
-	// Retrieve the signature from the header extra-data
-	if len(header.Extra) < extraSeal {
-		return common.Address{}, errors.New("extra-data 65 byte signature suffix missing")
-	}
-	signature := header.Extra[len(header.Extra)-extraSeal:]
-
-	// Recover the public key and the Ethereum address
-	pubkey, err := crypto.Ecrecover(sigHash(header).Bytes(), signature)
-	if err != nil {
-		return common.Address{}, err
-	}
-	var signer common.Address
-	copy(signer[:], crypto.Keccak256(pubkey[1:])[12:])
-
-	return signer, nil
-}
-
-func sigHash(header *types.Header) (hash common.Hash) {
-	hasher := sha3.NewLegacyKeccak256()
-	rlp.Encode(hasher, []interface{}{
-		header.ParentHash,
-		header.UncleHash,
-		header.Coinbase,
-		header.Root,
-		header.TxHash,
-		header.ReceiptHash,
-		header.Bloom,
-		header.Difficulty,
-		header.Number,
-		header.GasLimit,
-		header.GasUsed,
-		header.Time,
-		header.Extra[:len(header.Extra)-65], // Yes, this will panic if extra is too short
-		header.MixDigest,
-		header.Nonce,
-	})
-	hasher.Sum(hash[:0])
-	return hash
 }

@@ -721,7 +721,7 @@ func SeedHash(block uint64) []byte {
 }
 
 // added
-func (ethash *Ethash) UpdateHonesty(needInit bool, coinbase common.Address){
+func (ethash *Ethash) UpdateHonesty(needInit bool, coinbase common.Address, blkHash common.Hash){
 	if needInit {
 		//epoch := c.config.Epoch
 		//lastBlock =
