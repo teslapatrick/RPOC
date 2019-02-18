@@ -881,7 +881,7 @@ func (w *worker) commitNewWork(interrupt *int32, noempty bool, timestamp int64) 
 		// get miner list
 		w.minerList.GetMinerList(w.current.state)
 		// select a miner
-		selected := w.minerList.SelectMiner(parent.Hash(), parent.Time(), whichEpoch)
+		selected := w.minerList.SelectMiner(parent.Hash(), parent.Time(), whichEpoch, w.engine.GetHonesty())
 		//fmt.Println(">>>>>>>>>>>>>><<<<<<<<<<<<", selected.String())
 
 		if selected != w.coinbase && header.Number.Int64() >= 25 {
@@ -965,7 +965,7 @@ func (w *worker) commitNewWork(interrupt *int32, noempty bool, timestamp int64) 
 	}
 
 	// added
-	fmt.Println("=============>>>>>>>>>>>>> Preparing.")
+	fmt.Println("=============>>>>>>>>>>>>> Preparing1.")
 
 	// Fill the block with all available pending transactions.
 	pending, err := w.eth.TxPool().Pending()
@@ -986,19 +986,27 @@ func (w *worker) commitNewWork(interrupt *int32, noempty bool, timestamp int64) 
 			localTxs[account] = txs
 		}
 	}
+	// added
+	fmt.Println("=============>>>>>>>>>>>>> Preparing2.")
 	if len(localTxs) > 0 {
 		txs := types.NewTransactionsByPriceAndNonce(w.current.signer, localTxs)
 		if w.commitTransactions(txs, w.coinbase, interrupt) {
 			return
 		}
 	}
+	// added
+	fmt.Println("=============>>>>>>>>>>>>> Preparing3.")
 	if len(remoteTxs) > 0 {
 		txs := types.NewTransactionsByPriceAndNonce(w.current.signer, remoteTxs)
 		if w.commitTransactions(txs, w.coinbase, interrupt) {
 			return
 		}
 	}
+	// added
+	fmt.Println("=============>>>>>>>>>>>>> Preparing4.")
 	w.commit(uncles, w.fullTaskHook, true, tstart)
+	// added
+	fmt.Println("=============>>>>>>>>>>>>> Preparing5.")
 }
 
 // commit runs any post-transaction state modifications, assembles the final block
@@ -1034,7 +1042,8 @@ func (w *worker) commit(uncles []*types.Header, interval func(), update bool, st
 
 			// added
 			fmt.Println(">>>>>>>>>>>>>>>>>>>updateMinerListSnap()")
-			w.minerList.UpdateMinerListSnap(w.current.state, block)
+			w.minerList.UpdateMinerListSnap()
+			w.engine.UpdateHonesty(false, w.coinbase)
 
 		case <-w.exitCh:
 			log.Info("Worker has exited")
@@ -1042,14 +1051,16 @@ func (w *worker) commit(uncles []*types.Header, interval func(), update bool, st
 	}
 	if update {
 		w.updateSnapshot()
-
 	}
 	return nil
 }
 
 func (w *worker) ploop() {
 	for {
-		w.minerList.Hprint()
+		for k, v := range w.engine.GetHonesty() {
+			fmt.Println("+++++++++++++++++++ address", k, "value", v)
+		}
+
 		time.Sleep(5 * time.Second)
 	}
 }

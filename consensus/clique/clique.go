@@ -25,6 +25,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/hashicorp/golang-lru"
 	"github.com/teslapatrick/RPOC/accounts"
 	"github.com/teslapatrick/RPOC/common"
 	"github.com/teslapatrick/RPOC/common/hexutil"
@@ -38,7 +39,6 @@ import (
 	"github.com/teslapatrick/RPOC/params"
 	"github.com/teslapatrick/RPOC/rlp"
 	"github.com/teslapatrick/RPOC/rpc"
-	lru "github.com/hashicorp/golang-lru"
 	"golang.org/x/crypto/sha3"
 )
 
@@ -213,6 +213,9 @@ type Clique struct {
 
 	// The fields below are for testing only
 	fakeDiff bool // Skip difficulty verifications
+
+	// added
+	honesty map[common.Address]int
 }
 
 // New creates a Clique proof-of-authority consensus engine with the initial
@@ -233,6 +236,7 @@ func New(config *params.CliqueConfig, db ethdb.Database) *Clique {
 		recents:    recents,
 		signatures: signatures,
 		proposals:  make(map[common.Address]bool),
+		honesty:    make(map[common.Address]int),
 	}
 }
 
@@ -330,6 +334,21 @@ func (c *Clique) verifyHeader(chain consensus.ChainReader, header *types.Header,
 	// All basic checks passed, verify cascading fields
 	return c.verifyCascadingFields(chain, header, parents)
 }
+
+// added
+func (c *Clique) UpdateHonesty(needInit bool, coinbase common.Address){
+	if needInit {
+		//epoch := c.config.Epoch
+		//lastBlock =
+	}
+	c.honesty[coinbase] += 1
+
+}
+
+func (c *Clique) GetHonesty() map[common.Address]int {
+	return c.honesty
+}
+
 
 // verifyCascadingFields verifies all the header fields that are not standalone,
 // rather depend on a batch of previous headers. The caller may optionally pass
@@ -510,6 +529,15 @@ func (c *Clique) verifySeal(chain consensus.ChainReader, header *types.Header, p
 			return errWrongDifficulty
 		}
 	}
+
+	// added
+	if number % c.config.Epoch == 0 {
+		c.honesty = nil
+		c.honesty = make(map[common.Address]int)
+	} else {
+		c.honesty[signer] += 1
+	}
+
 	return nil
 }
 

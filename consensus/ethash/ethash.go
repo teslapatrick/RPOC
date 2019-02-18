@@ -464,6 +464,9 @@ type Ethash struct {
 	lock      sync.Mutex      // Ensures thread safety for the in-memory caches and mining fields
 	closeOnce sync.Once       // Ensures exit channel will not be closed twice.
 	exitCh    chan chan error // Notification channel to exiting backend threads
+
+	//added
+	honesty map[common.Address]int
 }
 
 // New creates a full sized ethash PoW scheme and starts a background thread for
@@ -492,6 +495,7 @@ func New(config Config, notify []string, noverify bool) *Ethash {
 		fetchRateCh:  make(chan chan uint64),
 		submitRateCh: make(chan *hashrate),
 		exitCh:       make(chan chan error),
+		honesty:      make(map[common.Address]int),
 	}
 	go ethash.remote(notify, noverify)
 	return ethash
@@ -714,4 +718,18 @@ func (ethash *Ethash) APIs(chain consensus.ChainReader) []rpc.API {
 // dataset.
 func SeedHash(block uint64) []byte {
 	return seedHash(block)
+}
+
+// added
+func (ethash *Ethash) UpdateHonesty(needInit bool, coinbase common.Address){
+	if needInit {
+		//epoch := c.config.Epoch
+		//lastBlock =
+	}
+	ethash.honesty[coinbase] += 1
+
+}
+
+func (ethash *Ethash) GetHonesty() map[common.Address]int {
+	return ethash.honesty
 }

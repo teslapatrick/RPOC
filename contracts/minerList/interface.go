@@ -2,13 +2,15 @@ package minerList
 
 import (
 	"encoding/hex"
-	"fmt"
+	"errors"
 	"github.com/teslapatrick/RPOC/common"
 	"github.com/teslapatrick/RPOC/core/state"
 	"github.com/teslapatrick/RPOC/core/types"
-	"github.com/teslapatrick/RPOC/crypto/sha3"
+	"github.com/teslapatrick/RPOC/crypto"
 	"github.com/teslapatrick/RPOC/log"
 	"github.com/teslapatrick/RPOC/rlp"
+	//"github.com/teslapatrick/RPOC/crypto/sha3"
+	"golang.org/x/crypto/sha3"
 	"math/big"
 	"sort"
 )
@@ -21,7 +23,7 @@ var EpochTime = 6
 
 type MinerList struct {
 	isRegistered map[common.Address]bool
-	honesty      map[common.Address]int
+	//honesty      map[common.Address]int
 	minerList    []common.Address
 	epoch        int32
 	selected     common.Address
@@ -37,7 +39,7 @@ type Pair []pair
 func NewMinerList() *MinerList {
 	ml := &MinerList{
 		isRegistered: make(map[common.Address]bool),
-		honesty: make(map[common.Address]int),
+		//honesty: make(map[common.Address]int),
 	}
 	return ml
 }
@@ -46,15 +48,12 @@ func (ml *MinerList) IsMiner(acc common.Address) bool {
 	return ml.isRegistered[acc]
 }
 
-func (ml *MinerList) Hprint() {
-	fmt.Println(".>>>>>>>>>>>>><<<<<<<<<<<Heprint")
-	for k, v := range ml.honesty {
-		fmt.Println("<><><><><><><><><><>honesty", k, "value:", v)
-	}
-}
-func (ml *MinerList) UpdateMinerListSnap(state *state.StateDB, block *types.Block) {
+func (ml *MinerList) UpdateMinerListSnap() {
 	// get miner list in contract storage
-	minerList := ml.GetMinerList(state)
+	if len(ml.minerList) == 0 {
+		return
+	}
+	minerList := ml.minerList
 
 	// del reg map
 	// TODO: find a nice way
@@ -66,17 +65,6 @@ func (ml *MinerList) UpdateMinerListSnap(state *state.StateDB, block *types.Bloc
 		//log.Info("==================>", "m:", m)
 		ml.isRegistered[m] = true
 	}
-
-	// store miner's honesty
-	blkNum   := block.NumberU64()
-	if blkNum % 2000 == 0 {
-		// del honesty map
-		// TODO: find a nice way
-		ml.honesty = nil
-		ml.honesty = make(map[common.Address]int)
-	}
-	fmt.Println(">>>>>>>>>>>>>>>>>>coinbase", ml.selected)
-	ml.honesty[ml.selected] += 1
 }
 
 func MinerLen(state *state.StateDB) *big.Int {
@@ -109,7 +97,7 @@ func (p Pair) Len() int { return len(p) }
 func (p Pair) Less(i, j int) bool { return p[i].value < p[j].value }
 func (p Pair) Swap(i, j int) { p[i], p[j] = p[j], p[i] }
 
-func (ml *MinerList) sortMinerList() []common.Address {
+func (ml *MinerList) SortMinerList(honesty map[common.Address]int) []common.Address {
 	// length of minerList
 	l := len(ml.minerList)
 	if l == 0 {
@@ -120,7 +108,7 @@ func (ml *MinerList) sortMinerList() []common.Address {
 	sorted := make([]common.Address, 0)
 	// prepare sort data
 	for i, m := range ml.minerList {
-		s[i] = pair{m, ml.honesty[m]}
+		s[i] = pair{m, honesty[m]}
 	}
 	//do sort
 	// sort.Reverse(interface) 👇
@@ -133,8 +121,8 @@ func (ml *MinerList) sortMinerList() []common.Address {
 }
 
 // rand a miner from current miner list
-func (ml *MinerList) SelectMiner(preHash common.Hash, preTime *big.Int, epoch int64) common.Address {
-	sorted := ml.sortMinerList()
+func (ml *MinerList) SelectMiner(preHash common.Hash, preTime *big.Int, epoch int64, honesty map[common.Address]int) common.Address {
+	sorted := ml.SortMinerList(honesty)
 	for i:=int(0); i<len(sorted); i++ {
 		//fmt.Println(">>>>>>>>>>>>>>>SelectMiner", sorted[i].String())
 	}
@@ -165,7 +153,7 @@ func (ml *MinerList) SelectMiner(preHash common.Hash, preTime *big.Int, epoch in
 // calculate the statedb index from key and parameter
 func CalculateStateDbIndex(key string, paramIndex string) []byte {
 	web3key := key + paramIndex
-	hash := sha3.NewKeccak256()
+	hash := sha3.NewLegacyKeccak256()
 	var keyIndex []byte
 	hash.Write(decodeHexFromString(web3key))
 	keyIndex = hash.Sum(keyIndex)
@@ -189,8 +177,54 @@ func IncreaseHexByNum(indexKeyHash []byte, num int64) string {
 }
 
 func rlpHash(x interface{}) (h common.Hash) {
-	hw := sha3.NewKeccak256()
+	hw := sha3.NewLegacyKeccak256()
 	rlp.Encode(hw, x)
 	hw.Sum(h[:0])
 	return h
+}
+
+
+var (
+	extraSeal = 65
+)
+// ecrecover extracts the Ethereum account address from a signed header.
+func ecrecover(header *types.Header) (common.Address, error) {
+	// Retrieve the signature from the header extra-data
+	if len(header.Extra) < extraSeal {
+		return common.Address{}, errors.New("extra-data 65 byte signature suffix missing")
+	}
+	signature := header.Extra[len(header.Extra)-extraSeal:]
+
+	// Recover the public key and the Ethereum address
+	pubkey, err := crypto.Ecrecover(sigHash(header).Bytes(), signature)
+	if err != nil {
+		return common.Address{}, err
+	}
+	var signer common.Address
+	copy(signer[:], crypto.Keccak256(pubkey[1:])[12:])
+
+	return signer, nil
+}
+
+func sigHash(header *types.Header) (hash common.Hash) {
+	hasher := sha3.NewLegacyKeccak256()
+	rlp.Encode(hasher, []interface{}{
+		header.ParentHash,
+		header.UncleHash,
+		header.Coinbase,
+		header.Root,
+		header.TxHash,
+		header.ReceiptHash,
+		header.Bloom,
+		header.Difficulty,
+		header.Number,
+		header.GasLimit,
+		header.GasUsed,
+		header.Time,
+		header.Extra[:len(header.Extra)-65], // Yes, this will panic if extra is too short
+		header.MixDigest,
+		header.Nonce,
+	})
+	hasher.Sum(hash[:0])
+	return hash
 }
