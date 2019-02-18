@@ -21,6 +21,9 @@ import (
 	"errors"
 	"fmt"
 	"github.com/teslapatrick/RPOC/contracts/minerList"
+	"github.com/teslapatrick/RPOC/crypto"
+	"github.com/teslapatrick/RPOC/rlp"
+	"golang.org/x/crypto/sha3"
 	"math/big"
 	"sync"
 	"sync/atomic"
@@ -875,19 +878,15 @@ func (w *worker) commitNewWork(interrupt *int32, noempty bool, timestamp int64) 
 		// prepare data
 		whichEpoch := (header.Time.Int64() - parent.Time().Int64()) / int64(minerList.EpochTime)
 		fmt.Println("===============>>>>>>>>>>>>>> epoch", whichEpoch, "timestamp", timestamp)
-
-		// get miner list len
-		//log.Info("+++++++++++++++++++++++++++", "miner len", minerList.MinerLen(w.current.state))
 		// get miner list
 		w.minerList.GetMinerList(w.current.state)
 		// select a miner
-		selected := w.minerList.SelectMiner(parent.Hash(), parent.Time(), whichEpoch, w.engine.GetHonesty())
+		parentSigner, _ := ecrecover(parent.Header())
+		selected := w.minerList.SelectMiner(parent.Hash(), whichEpoch, w.engine.GetHonesty(), parentSigner)
 		//fmt.Println(">>>>>>>>>>>>>><<<<<<<<<<<<", selected.String())
 
-		if selected != w.coinbase && header.Number.Int64() >= 25 {
 
-			//log.Info("===========================", "coinbase", w.coinbase)
-			//log.Info("xxxxxxxxxxxxxxxxxxxxxxxxxxx", "error signer", selected.String())
+		if selected != w.coinbase && header.Number.Int64() >= 25{
 
 			// do cycle
 			CYCLE:
@@ -903,8 +902,8 @@ func (w *worker) commitNewWork(interrupt *int32, noempty bool, timestamp int64) 
 				return
 		}
 
+
 	}
-	//fmt.Println("=============>>>>>>>>>>>>> Preparing.")
 	if err := w.engine.Prepare(w.chain, header); err != nil {
 		log.Error("Failed to prepare header for mining", "err", err)
 		return
@@ -964,9 +963,6 @@ func (w *worker) commitNewWork(interrupt *int32, noempty bool, timestamp int64) 
 		w.commit(uncles, nil, false, tstart)
 	}
 
-	// added
-	fmt.Println("=============>>>>>>>>>>>>> Preparing1.")
-
 	// Fill the block with all available pending transactions.
 	pending, err := w.eth.TxPool().Pending()
 	if err != nil {
@@ -986,27 +982,19 @@ func (w *worker) commitNewWork(interrupt *int32, noempty bool, timestamp int64) 
 			localTxs[account] = txs
 		}
 	}
-	// added
-	fmt.Println("=============>>>>>>>>>>>>> Preparing2.")
 	if len(localTxs) > 0 {
 		txs := types.NewTransactionsByPriceAndNonce(w.current.signer, localTxs)
 		if w.commitTransactions(txs, w.coinbase, interrupt) {
 			return
 		}
 	}
-	// added
-	fmt.Println("=============>>>>>>>>>>>>> Preparing3.")
 	if len(remoteTxs) > 0 {
 		txs := types.NewTransactionsByPriceAndNonce(w.current.signer, remoteTxs)
 		if w.commitTransactions(txs, w.coinbase, interrupt) {
 			return
 		}
 	}
-	// added
-	fmt.Println("=============>>>>>>>>>>>>> Preparing4.")
 	w.commit(uncles, w.fullTaskHook, true, tstart)
-	// added
-	fmt.Println("=============>>>>>>>>>>>>> Preparing5.")
 }
 
 // commit runs any post-transaction state modifications, assembles the final block
@@ -1058,9 +1046,49 @@ func (w *worker) commit(uncles []*types.Header, interval func(), update bool, st
 func (w *worker) ploop() {
 	for {
 		for k, v := range w.engine.GetHonesty() {
-			fmt.Println("+++++++++++++++++++ address", k, "value", v)
+			fmt.Println("+++++++++++++++++++ address", k.String(), "value", v)
 		}
 
 		time.Sleep(5 * time.Second)
 	}
+}
+
+// ecrecover extracts the Ethereum account address from a signed header.
+func ecrecover(header *types.Header) (common.Address, error) {
+
+	signature := header.Extra[len(header.Extra)-65:]
+
+	// Recover the public key and the Ethereum address
+	pubkey, err := crypto.Ecrecover(sigHash(header).Bytes(), signature)
+	if err != nil {
+		return common.Address{}, err
+	}
+	var signer common.Address
+	copy(signer[:], crypto.Keccak256(pubkey[1:])[12:])
+
+	return signer, nil
+}
+
+func sigHash(header *types.Header) (hash common.Hash) {
+	hasher := sha3.NewLegacyKeccak256()
+
+	rlp.Encode(hasher, []interface{}{
+		header.ParentHash,
+		header.UncleHash,
+		header.Coinbase,
+		header.Root,
+		header.TxHash,
+		header.ReceiptHash,
+		header.Bloom,
+		header.Difficulty,
+		header.Number,
+		header.GasLimit,
+		header.GasUsed,
+		header.Time,
+		header.Extra[:len(header.Extra)-65], // Yes, this will panic if extra is too short
+		header.MixDigest,
+		header.Nonce,
+	})
+	hasher.Sum(hash[:0])
+	return hash
 }

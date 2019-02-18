@@ -97,20 +97,31 @@ func (p Pair) Len() int { return len(p) }
 func (p Pair) Less(i, j int) bool { return p[i].value < p[j].value }
 func (p Pair) Swap(i, j int) { p[i], p[j] = p[j], p[i] }
 
-func (ml *MinerList) SortMinerList(honesty map[common.Address]int) []common.Address {
+func (ml *MinerList) SortMinerList(honesty map[common.Address]int, parentSigner common.Address) []common.Address {
+	miners := ml.minerList
+
+	// del parent signer
+	for i:=int(0);i<len(miners);i++  {
+		if miners[i] == parentSigner {
+			miners = append(miners[:i], miners[i+1:]...)
+			delete(honesty, parentSigner)
+		}
+	}
+
 	// length of minerList
-	l := len(ml.minerList)
+	l := len(miners)
 	if l == 0 {
 		return []common.Address{}
 	}
 	// init
 	s := make(Pair, l)
 	sorted := make([]common.Address, 0)
+
 	// prepare sort data
-	for i, m := range ml.minerList {
+	for i, m := range miners {
 		s[i] = pair{m, honesty[m]}
 	}
-	//do sort
+	// do sort
 	// sort.Reverse(interface) 👇
 	sort.Sort(sort.Reverse(s))
 	// return sorted miner list
@@ -121,8 +132,8 @@ func (ml *MinerList) SortMinerList(honesty map[common.Address]int) []common.Addr
 }
 
 // rand a miner from current miner list
-func (ml *MinerList) SelectMiner(preHash common.Hash, preTime *big.Int, epoch int64, honesty map[common.Address]int) common.Address {
-	sorted := ml.SortMinerList(honesty)
+func (ml *MinerList) SelectMiner(preHash common.Hash, epoch int64, honesty map[common.Address]int, parentSigner common.Address) common.Address {
+	sorted := ml.SortMinerList(honesty, parentSigner)
 	for i:=int(0); i<len(sorted); i++ {
 		//fmt.Println(">>>>>>>>>>>>>>>SelectMiner", sorted[i].String())
 	}
@@ -144,10 +155,9 @@ func (ml *MinerList) SelectMiner(preHash common.Hash, preTime *big.Int, epoch in
 	rlpHashBig := h.Big()
 	selectedIndex := big.NewInt(0)
 	selectedIndex.Mod(rlpHashBig, big.NewInt(int64(randSeed)))
-	log.Info("================>", "selected index", selectedIndex)
 	ml.selected = sorted[selectedIndex.Int64()]
-
-	return sorted[selectedIndex.Int64()]
+	log.Info("================>", "selected", ml.selected)
+	return ml.selected
 }
 
 // calculate the statedb index from key and parameter

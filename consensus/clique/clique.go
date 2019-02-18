@@ -20,6 +20,7 @@ package clique
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"math/big"
 	"math/rand"
 	"sync"
@@ -216,6 +217,7 @@ type Clique struct {
 
 	// added
 	honesty map[common.Address]int
+	lastAdded common.Address
 }
 
 // New creates a Clique proof-of-authority consensus engine with the initial
@@ -341,8 +343,12 @@ func (c *Clique) UpdateHonesty(needInit bool, coinbase common.Address){
 		//epoch := c.config.Epoch
 		//lastBlock =
 	}
-	c.honesty[coinbase] += 1
 
+	if c.lastAdded == coinbase {
+		return
+	}
+	c.honesty[coinbase] += 1
+	c.lastAdded = coinbase
 }
 
 func (c *Clique) GetHonesty() map[common.Address]int {
@@ -535,7 +541,8 @@ func (c *Clique) verifySeal(chain consensus.ChainReader, header *types.Header, p
 		c.honesty = nil
 		c.honesty = make(map[common.Address]int)
 	} else {
-		c.honesty[signer] += 1
+		fmt.Println("~~~~~~~~~~~~~~~~~~~~~~ add honesty", signer.String(), "blknumber", header.Number)
+		c.UpdateHonesty(false, signer)
 	}
 
 	return nil
