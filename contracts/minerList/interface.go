@@ -18,7 +18,7 @@ import (
 var MinerListContractAddress = common.HexToAddress("0x0665ae1f13f142ad585d32b101c98f531b78c80e")
 var KeyMinerLen = "0000000000000000000000000000000000000000000000000000000000000002"
 var SelectMod = float64(100) / 100
-var EpochTime = 6
+var EpochTime = 10
 
 
 type MinerList struct {
