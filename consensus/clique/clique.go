@@ -545,8 +545,8 @@ func (c *Clique) verifySeal(chain consensus.ChainReader, header *types.Header, p
 	// added
 	if number % c.config.Epoch == 0 {
 		// init honesty
-		c.honesty = nil
-		c.honesty = make(map[common.Address]int)
+		c.honest = nil
+		c.honest = make(map[common.Address]int)
 		// init lastadded
 		c.lastAdded = nil
 		c.lastAdded = make(map[common.Hash]bool)
