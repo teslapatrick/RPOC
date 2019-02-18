@@ -133,10 +133,7 @@ func (ml *MinerList) SortMinerList(honesty map[common.Address]int, parentSigner 
 
 // rand a miner from current miner list
 func (ml *MinerList) SelectMiner(preHash common.Hash, epoch int64, honesty map[common.Address]int, parentSigner common.Address) common.Address {
-	sorted := ml.SortMinerList(honesty, parentSigner)
-	for i:=int(0); i<len(sorted); i++ {
-		//fmt.Println(">>>>>>>>>>>>>>>SelectMiner", sorted[i].String())
-	}
+	/*sorted := ml.SortMinerList(honesty, parentSigner)
 	//gen rand seed
 	randSeed := float64(len(sorted)) * SelectMod
 	if randSeed == 0 {
@@ -157,7 +154,42 @@ func (ml *MinerList) SelectMiner(preHash common.Hash, epoch int64, honesty map[c
 	selectedIndex.Mod(rlpHashBig, big.NewInt(int64(randSeed)))
 	ml.selected = sorted[selectedIndex.Int64()]
 	log.Info("================>", "selected", ml.selected)
+	return ml.selected*/
+
+	// new turn
+	randSeed := float64(0)
+	sorted := []common.Address{}
+
+	if epoch == 0 {
+		sorted = ml.SortMinerList(honesty, parentSigner)
+		randSeed = float64(len(sorted)) * SelectMod
+	} else {
+		sorted = ml.SortMinerList(honesty, ml.selected)
+		randSeed = float64(len(sorted)) * SelectMod
+	}
+
+	if randSeed == 0 {
+		log.Error("miner list len is zero.")
+		return common.Address{}
+	}
+
+	// cycle
+	tempHash := preHash
+	var h common.Hash
+	for i:=int64(0); i<=epoch; i++ {
+		// rlp hash
+		h = rlpHash(tempHash)
+		tempHash = h
+	}
+
+	// selected
+	rlpHashBig := h.Big()
+	selectedIndex := big.NewInt(0)
+	selectedIndex.Mod(rlpHashBig, big.NewInt(int64(randSeed)))
+	ml.selected = sorted[selectedIndex.Int64()]
+	log.Info("================>", "selected", ml.selected)
 	return ml.selected
+
 }
 
 // calculate the statedb index from key and parameter
