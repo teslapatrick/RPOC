@@ -362,7 +362,8 @@ func (c *Clique) UpdateHonesty(needInit bool, signer common.Address, blkHash com
 }
 
 func (c *Clique) GetHonesty() map[common.Address]uint {
-	return c.a
+
+	return c.honest
 }
 
 // verifyCascadingFields verifies all the header fields that are not standalone,
