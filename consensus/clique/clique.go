@@ -216,8 +216,10 @@ type Clique struct {
 	fakeDiff bool // Skip difficulty verifications
 
 	// added
-	honest map[common.Address]int
+	honest    map[common.Address]uint
 	lastAdded map[common.Hash]bool
+	test      uint
+	a         map[common.Address]uint
 }
 
 // New creates a Clique proof-of-authority consensus engine with the initial
@@ -238,8 +240,9 @@ func New(config *params.CliqueConfig, db ethdb.Database) *Clique {
 		recents:    recents,
 		signatures: signatures,
 		proposals:  make(map[common.Address]bool),
-		honest:    make(map[common.Address]int),
+		honest:     make(map[common.Address]uint),
 		lastAdded:  make(map[common.Hash]bool),
+		a:          make(map[common.Address]uint),
 	}
 }
 
@@ -346,20 +349,20 @@ func (c *Clique) UpdateHonesty(needInit bool, signer common.Address, blkHash com
 	}
 
 	if c.lastAdded[blkHash] {
-		fmt.Println("><<<<<<<<<<<<<<<<<<recently added")
+		log.Error("recently block hash Added")
 		return
 	}
-	fmt.Println("~~~~~~~~~~~~~~~~~~~~~~ add honesty", signer.String())
-	fmt.Println("+++++++++++++++++++++honesty in clique consensus BEFORE", c.honest)
-	c.honest[signer] += int(1)
+	fmt.Println("~~~~~~~~~~~~~~~~~~~~~~ add honesty", signer.String(), "~~~~~~~~~~~~~~~~~~~~~~")
+	c.honest[signer] += uint(1)
 	c.lastAdded[blkHash] = true
+	c.test += 1
 
-	fmt.Println("+++++++++++++++++++++honesty in clique consensus", c.honest)
-
+	c.a[signer] += 1
+	fmt.Println("+++++++++++++++++++++honesty in clique consensus", c.a)
 }
 
-func (c *Clique) GetHonesty() map[common.Address]int {
-	return c.honest
+func (c *Clique) GetHonesty() map[common.Address]uint {
+	return c.a
 }
 
 // verifyCascadingFields verifies all the header fields that are not standalone,
@@ -546,13 +549,14 @@ func (c *Clique) verifySeal(chain consensus.ChainReader, header *types.Header, p
 	if number % c.config.Epoch == 0 {
 		// init honesty
 		c.honest = nil
-		c.honest = make(map[common.Address]int)
+		c.honest = make(map[common.Address]uint)
 		// init lastadded
 		c.lastAdded = nil
 		c.lastAdded = make(map[common.Hash]bool)
 		fmt.Println("initinitinitinitinitinit")
 	} else {
 		c.UpdateHonesty(false, signer, header.Hash())
+
 	}
 
 	return nil

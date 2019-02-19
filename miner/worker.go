@@ -874,9 +874,6 @@ func (w *worker) commitNewWork(interrupt *int32, noempty bool, timestamp int64) 
 		header.Coinbase = w.coinbase
 
 		// added
-
-
-
 		// prepare data
 		whichEpoch := (header.Time.Int64() - parent.Time().Int64()) / int64(minerList.EpochTime)
 		//fmt.Println("===============>>>>>>>>>>>>>> epoch", whichEpoch, "timestamp", timestamp)
@@ -884,10 +881,10 @@ func (w *worker) commitNewWork(interrupt *int32, noempty bool, timestamp int64) 
 		w.minerList.GetMinerList(w.current.state)
 		// select a miner
 		parentSigner, _ := ecrecover(parent.Header())
-		fmt.Println(">>>>>>>>>>>>>><<<<<<<<<<<<w.engine.GetHonesty()Before", w.engine.GetHonesty())
-		selected := w.minerList.SelectMiner(parent.Hash(), whichEpoch, w.engine.GetHonesty(), parentSigner)
+		honesty := w.engine.GetHonesty()
+		selected := w.minerList.SelectMiner(parent.Hash(), whichEpoch, honesty, parentSigner)
+		//selected := w.coinbase
 		fmt.Println(">>>>>>>>>>>>>><<<<<<<<<<<<w.engine.GetHonesty()", w.engine.GetHonesty())
-
 
 		if selected != w.coinbase && header.Number.Int64() >= 25{
 

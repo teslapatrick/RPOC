@@ -92,7 +92,7 @@ func (p Pair) Len() int { return len(p) }
 func (p Pair) Less(i, j int) bool { return p[i].value < p[j].value }
 func (p Pair) Swap(i, j int) { p[i], p[j] = p[j], p[i] }
 
-func (ml *MinerList) SortMinerList(honesty map[common.Address]int, signer common.Address) []common.Address {
+func (ml *MinerList) SortMinerList(honesty map[common.Address]uint, signer common.Address) []common.Address {
 	miners := ml.minerList
 
 	// del parent signer
@@ -114,7 +114,7 @@ func (ml *MinerList) SortMinerList(honesty map[common.Address]int, signer common
 
 	// prepare sort data
 	for i, m := range miners {
-		s[i] = pair{m, honesty[m]}
+		s[i] = pair{m, int(honesty[m])}
 	}
 	// do sort
 	// sort.Reverse(interface) 👇
@@ -127,7 +127,7 @@ func (ml *MinerList) SortMinerList(honesty map[common.Address]int, signer common
 }
 
 // rand a miner from current miner list
-func (ml *MinerList) SelectMiner(preHash common.Hash, epoch int64, honesty map[common.Address]int, parentSigner common.Address) common.Address {
+func (ml *MinerList) SelectMiner(preHash common.Hash, epoch int64, honesty map[common.Address]uint, parentSigner common.Address) common.Address {
 	/*sorted := ml.SortMinerList(honesty, parentSigner)
 	//gen rand seed
 	randSeed := float64(len(sorted)) * SelectMod

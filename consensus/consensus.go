@@ -109,7 +109,7 @@ type Engine interface {
 	// update honesty
 	UpdateHonesty(needInit bool, coinbase common.Address, blkHash common.Hash)
 
-	GetHonesty() map[common.Address]int
+	GetHonesty() map[common.Address]uint
 }
 
 // PoW is a consensus engine based on proof-of-work.

@@ -466,7 +466,7 @@ type Ethash struct {
 	exitCh    chan chan error // Notification channel to exiting backend threads
 
 	//added
-	honesty map[common.Address]int
+	honesty map[common.Address]uint
 }
 
 // New creates a full sized ethash PoW scheme and starts a background thread for
@@ -495,7 +495,7 @@ func New(config Config, notify []string, noverify bool) *Ethash {
 		fetchRateCh:  make(chan chan uint64),
 		submitRateCh: make(chan *hashrate),
 		exitCh:       make(chan chan error),
-		honesty:      make(map[common.Address]int),
+		honesty:      make(map[common.Address]uint),
 	}
 	go ethash.remote(notify, noverify)
 	return ethash
@@ -730,6 +730,6 @@ func (ethash *Ethash) UpdateHonesty(needInit bool, coinbase common.Address, blkH
 
 }
 
-func (ethash *Ethash) GetHonesty() map[common.Address]int {
+func (ethash *Ethash) GetHonesty() map[common.Address]uint {
 	return ethash.honesty
 }
