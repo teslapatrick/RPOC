@@ -218,7 +218,6 @@ type Clique struct {
 	// added
 	honest    map[common.Address]uint
 	lastAdded map[common.Hash]bool
-	test      uint
 	a         map[common.Address]uint
 }
 
@@ -352,18 +351,27 @@ func (c *Clique) UpdateHonesty(needInit bool, signer common.Address, blkHash com
 		log.Error("recently block hash Added")
 		return
 	}
-	fmt.Println("~~~~~~~~~~~~~~~~~~~~~~ add honesty", signer.String(), "~~~~~~~~~~~~~~~~~~~~~~")
-	c.honest[signer] += uint(1)
-	c.lastAdded[blkHash] = true
-	c.test += 1
 
-	c.a[signer] += 1
-	fmt.Println("+++++++++++++++++++++honesty in clique consensus", c.a)
+	c.lastAdded[blkHash] = true
+
+	//temp := c.honest[signer]
+	//temp += uint(1)
+
+	//c.a[signer] = temp
+
+	c.honest[signer] += 1
+
+	//fmt.Println("+++++++++++++++++++++honesty in clique consensus", c.a)
+	fmt.Println("+++++++++++++++++++++honesty in clique consensus", c.honest)
 }
 
 func (c *Clique) GetHonesty() map[common.Address]uint {
-
-	return c.honest
+	temp := make(map[common.Address]uint)
+	for k, v := range c.honest {
+		temp[k] = v
+		//fmt.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>k", k, "v", v)
+ 	}
+	return temp
 }
 
 // verifyCascadingFields verifies all the header fields that are not standalone,

@@ -154,12 +154,12 @@ func (ml *MinerList) SelectMiner(preHash common.Hash, epoch int64, honesty map[c
 	// new turn
 	randSeed := float64(0)
 	sorted := []common.Address{}
-
+	hy := honesty
 	if epoch == 0 {
-		sorted = ml.SortMinerList(honesty, parentSigner)
+		sorted = ml.SortMinerList(hy, parentSigner)
 		randSeed = float64(len(sorted)) * SelectMod
 	} else {
-		sorted = ml.SortMinerList(honesty, ml.selected)
+		sorted = ml.SortMinerList(hy, ml.selected)
 		randSeed = float64(len(sorted)) * SelectMod
 	}
 
