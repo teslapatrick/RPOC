@@ -218,7 +218,6 @@ type Clique struct {
 	// added
 	honest    map[common.Address]uint
 	lastAdded map[common.Hash]bool
-	a         map[common.Address]uint
 }
 
 // New creates a Clique proof-of-authority consensus engine with the initial
@@ -241,7 +240,6 @@ func New(config *params.CliqueConfig, db ethdb.Database) *Clique {
 		proposals:  make(map[common.Address]bool),
 		honest:     make(map[common.Address]uint),
 		lastAdded:  make(map[common.Hash]bool),
-		a:          make(map[common.Address]uint),
 	}
 }
 
@@ -354,14 +352,8 @@ func (c *Clique) UpdateHonesty(needInit bool, signer common.Address, blkHash com
 
 	c.lastAdded[blkHash] = true
 
-	//temp := c.honest[signer]
-	//temp += uint(1)
-
-	//c.a[signer] = temp
-
 	c.honest[signer] += 1
 
-	//fmt.Println("+++++++++++++++++++++honesty in clique consensus", c.a)
 	fmt.Println("+++++++++++++++++++++honesty in clique consensus", c.honest)
 }
 
@@ -369,7 +361,6 @@ func (c *Clique) GetHonesty() map[common.Address]uint {
 	temp := make(map[common.Address]uint)
 	for k, v := range c.honest {
 		temp[k] = v
-		//fmt.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>k", k, "v", v)
  	}
 	return temp
 }
