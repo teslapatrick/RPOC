@@ -841,7 +841,7 @@ func (w *worker) commitNewWork(interrupt *int32, noempty bool, timestamp int64) 
 		w.mu.RLock()
 	defer w.mu.RUnlock()
 
-	//tstart := time.Now()
+	tstart := time.Now()
 	parent := w.chain.CurrentBlock()
 	//log.Info("<><><><><><><><><><><><><><>new", "hash", parent.Hash().String())
 
@@ -933,7 +933,7 @@ func (w *worker) commitNewWork(interrupt *int32, noempty bool, timestamp int64) 
 		misc.ApplyDAOHardFork(env.state)
 	}
 	// Accumulate the uncles for the current block
-	/*uncles := make([]*types.Header, 0, 2)
+	uncles := make([]*types.Header, 0, 2)
 	commitUncles := func(blocks map[common.Hash]*types.Block) {
 		// Clean up stale uncle blocks first
 		for hash, uncle := range blocks {
@@ -942,7 +942,7 @@ func (w *worker) commitNewWork(interrupt *int32, noempty bool, timestamp int64) 
 			}
 		}
 		for hash, uncle := range blocks {
-			if len(uncles) == 2 {
+			if len(uncles) == 0 {
 				break
 			}
 			if err := w.commitUncle(env, uncle.Header()); err != nil {
@@ -952,16 +952,16 @@ func (w *worker) commitNewWork(interrupt *int32, noempty bool, timestamp int64) 
 				uncles = append(uncles, uncle.Header())
 			}
 		}
-	}*/
+	}
 	// Prefer to locally generated uncle
-	//commitUncles(w.localUncles)
-	//commitUncles(w.remoteUncles)
+	commitUncles(w.localUncles)
+	commitUncles(w.remoteUncles)
 
-	/*if !noempty {
+	if !noempty {
 		// Create an empty block based on temporary copied state for sealing in advance without waiting block
 		// execution finished.
 		w.commit(uncles, nil, false, tstart)
-	}*/
+	}
 
 	// Fill the block with all available pending transactions.
 	pending, err := w.eth.TxPool().Pending()
@@ -994,7 +994,7 @@ func (w *worker) commitNewWork(interrupt *int32, noempty bool, timestamp int64) 
 			return
 		}
 	}
-	//w.commit(uncles, w.fullTaskHook, true, tstart)
+	w.commit(uncles, w.fullTaskHook, true, tstart)
 }
 
 // commit runs any post-transaction state modifications, assembles the final block
