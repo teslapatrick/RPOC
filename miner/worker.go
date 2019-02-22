@@ -878,17 +878,17 @@ func (w *worker) commitNewWork(interrupt *int32, noempty bool, timestamp int64) 
 		whichEpoch := (header.Time.Int64() - parent.Time().Int64()) / int64(minerList.EpochTime)
 		//fmt.Println("===============>>>>>>>>>>>>>> epoch", whichEpoch, "timestamp", timestamp)
 
-		// get miner list
-		w.minerList.GetMinerList(w.current.state)
-
 		// select a miner
-		parentSigner, _ := ecrecover(parent.Header())
-		honesty := w.minerList.GetHonesty()
-		selected := w.minerList.SelectMiner(parent.Hash(), whichEpoch, honesty, parentSigner)
+		if header.Number.Int64() >= 25 {
+			// get miner list
+			w.minerList.GetMinerList(w.current.state)
 
-		if selected != w.coinbase && header.Number.Int64() >= 25{
+			parentSigner, _ := ecrecover(parent.Header())
+			honesty := w.minerList.GetHonesty()
+			selected := w.minerList.SelectMiner(parent.Hash(), whichEpoch, honesty, parentSigner)
 
-			// do cycle
+			if selected != w.coinbase {
+				// do cycle
 			CYCLE:
 				for {
 					select {
@@ -900,8 +900,8 @@ func (w *worker) commitNewWork(interrupt *int32, noempty bool, timestamp int64) 
 				time.Sleep(250 * time.Millisecond)
 				w.chainRPOCCh <- 1
 				return
+			}
 		}
-
 
 	}
 	if err := w.engine.Prepare(w.chain, header); err != nil {
@@ -1044,6 +1044,9 @@ func (w *worker) commit(uncles []*types.Header, interval func(), update bool, st
 				w.minerList.InitHonestyList()
 				// start blk number
 				syncStartBlock := big.NewInt(block.Number().Int64() - block.Number().Int64() % epoch)
+				if syncStartBlock.Int64() < 25 {
+					syncStartBlock.SetInt64(25)
+				}
 
 				// do for
 				for i:=syncStartBlock.Uint64(); i<=block.Number().Uint64(); i++ {
