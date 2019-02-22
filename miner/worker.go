@@ -1047,12 +1047,13 @@ func (w *worker) commit(uncles []*types.Header, interval func(), update bool, st
 			}
 
 			if needInit {
+				fmt.Println("+++++++", block.Number().Int64())
 				epoch := int64(300)
 				w.minerList.InitHonestyList()
 				// start blk number
 				syncStartBlock := big.NewInt(block.Number().Int64() - block.Number().Int64() % epoch)
 				if syncStartBlock.Int64() < 25 {
-					syncStartBlock.SetInt64(25)
+					syncStartBlock.SetInt64(24)
 				}
 
 				// do for
