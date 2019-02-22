@@ -20,6 +20,7 @@ package ethash
 import (
 	"errors"
 	"fmt"
+	"github.com/teslapatrick/RPOC/core"
 	"math"
 	"math/big"
 	"math/rand"
@@ -721,7 +722,7 @@ func SeedHash(block uint64) []byte {
 }
 
 // added
-func (ethash *Ethash) UpdateHonesty(needInit bool, coinbase common.Address, blkHash common.Hash){
+func (ethash *Ethash) UpdateHonesty(needInit bool, coinbase common.Address, blkHash common.Hash, blkNum *big.Int, chain *core.BlockChain){
 	if needInit {
 		//epoch := c.config.Epoch
 		//lastBlock =

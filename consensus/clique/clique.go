@@ -21,6 +21,8 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/teslapatrick/RPOC/contracts/minerList"
+	"github.com/teslapatrick/RPOC/core"
 	"math/big"
 	"math/rand"
 	"sync"
@@ -339,10 +341,22 @@ func (c *Clique) verifyHeader(chain consensus.ChainReader, header *types.Header,
 }
 
 // added
-func (c *Clique) UpdateHonesty(needInit bool, signer common.Address, blkHash common.Hash){
+func (c *Clique) UpdateHonesty(needInit bool, signer common.Address, blkHash common.Hash, blkNum *big.Int, chain *core.BlockChain){
 	if needInit {
-		//epoch := c.config.Epoch
-		//lastBlock =
+		// del current state
+		c.honest = nil
+		c.honest = make(map[common.Address]uint)
+
+		// start blk number
+		syncStartBlock := big.NewInt(int64(blkNum.Uint64() % c.config.Epoch))
+
+		// do for
+		//loop := big.NewInt(0).Sub(blkNum, syncStartBlock).Uint64()
+		for i:=syncStartBlock.Uint64(); i<blkNum.Uint64(); i++ {
+			blkHeader := chain.GetHeaderByNumber(syncStartBlock.Uint64())
+			coinbase, _ := ecrecover(blkHeader, c.signatures)
+			c.honest[coinbase] += 1
+		}
 	}
 
 	if c.lastAdded[blkHash] {
@@ -354,7 +368,9 @@ func (c *Clique) UpdateHonesty(needInit bool, signer common.Address, blkHash com
 
 	c.honest[signer] += 1
 
-	fmt.Println("+++++++++++++++++++++honesty in clique consensus", c.honest)
+	for k, v := range c.honest {
+		fmt.Println("--------------------signer", k, "honesty", v)
+	}
 }
 
 func (c *Clique) GetHonesty() map[common.Address]uint {
@@ -555,7 +571,7 @@ func (c *Clique) verifySeal(chain consensus.ChainReader, header *types.Header, p
 		c.lastAdded = make(map[common.Hash]bool)
 		fmt.Println("initinitinitinitinitinit")
 	} else {
-		c.UpdateHonesty(false, signer, header.Hash())
+		c.UpdateHonesty(false, signer, header.Hash(), header.Number)
 
 	}
 
