@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/teslapatrick/RPOC/common/hexutil"
 	"github.com/teslapatrick/RPOC/contracts/minerList"
 	"github.com/teslapatrick/RPOC/crypto"
 	"github.com/teslapatrick/RPOC/rlp"
@@ -883,7 +884,13 @@ func (w *worker) commitNewWork(interrupt *int32, noempty bool, timestamp int64) 
 			// get miner list
 			w.minerList.GetMinerList(w.current.state)
 
+			fmt.Println(">><><>,><<<><<><<><><><NOW25", hexutil.Encode(parent.Extra()))
+
 			parentSigner, _ := ecrecover(parent.Header())
+			if parentSigner == common.BytesToAddress([]byte("0x0000000000000000000000000000000000000000")) {
+				fmt.Println("parent signer is zero")
+				w.chainRPOCCh <- 1
+			}
 			honesty := w.minerList.GetHonesty()
 			selected := w.minerList.SelectMiner(parent.Hash(), whichEpoch, honesty, parentSigner)
 
