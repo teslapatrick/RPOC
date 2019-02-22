@@ -20,7 +20,7 @@ var EpochTime = 10
 
 type MinerList struct {
 	isRegistered map[common.Address]bool
-	//honesty      map[common.Address]int
+	honesty      map[common.Address]uint
 	minerList    []common.Address
 	epoch        int32
 	selected     common.Address
@@ -36,7 +36,7 @@ type Pair []pair
 func NewMinerList() *MinerList {
 	ml := &MinerList{
 		isRegistered: make(map[common.Address]bool),
-		//honesty: make(map[common.Address]int),
+		honesty: make(map[common.Address]uint),
 	}
 	return ml
 }
@@ -185,6 +185,25 @@ func (ml *MinerList) SelectMiner(preHash common.Hash, epoch int64, honesty map[c
 	//log.Info("================>", "selected", ml.selected)
 	return ml.selected
 
+}
+
+func (ml *MinerList) InitHonestyList() {
+	// del current state
+	ml.honesty = nil
+	ml.honesty = make(map[common.Address]uint)
+}
+
+func (ml *MinerList) UpdateHonesty(coinbase common.Address) {
+	// add
+	ml.honesty[coinbase] += 1
+}
+
+func (ml *MinerList) GetHonesty() map[common.Address]uint {
+	temp := make(map[common.Address]uint)
+	for k, v := range ml.honesty {
+		temp[k] = v
+	}
+	return temp
 }
 
 // calculate the statedb index from key and parameter

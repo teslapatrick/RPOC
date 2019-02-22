@@ -18,7 +18,6 @@
 package consensus
 
 import (
-	"github.com/teslapatrick/RPOC/core"
 	"math/big"
 
 	"github.com/teslapatrick/RPOC/common"
@@ -108,9 +107,9 @@ type Engine interface {
 	Close() error
 
 	// update honesty
-	UpdateHonesty(needInit bool, coinbase common.Address, blkHash common.Hash, blkNum *big.Int, chain *core.BlockChain)
-
-	GetHonesty() map[common.Address]uint
+	//UpdateHonesty(needInit bool, coinbase common.Address, blkHash common.Hash, blkNum *big.Int, chain *core.BlockChain)
+	//
+	//GetHonesty() map[common.Address]uint
 }
 
 // PoW is a consensus engine based on proof-of-work.

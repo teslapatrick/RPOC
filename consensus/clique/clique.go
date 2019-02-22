@@ -20,9 +20,6 @@ package clique
 import (
 	"bytes"
 	"errors"
-	"fmt"
-	"github.com/teslapatrick/RPOC/contracts/minerList"
-	"github.com/teslapatrick/RPOC/core"
 	"math/big"
 	"math/rand"
 	"sync"
@@ -341,7 +338,7 @@ func (c *Clique) verifyHeader(chain consensus.ChainReader, header *types.Header,
 }
 
 // added
-func (c *Clique) UpdateHonesty(needInit bool, signer common.Address, blkHash common.Hash, blkNum *big.Int, chain *core.BlockChain){
+/*func (c *Clique) UpdateHonesty(needInit bool, signer common.Address, blkHash common.Hash, blkNum *big.Int, chain *core.BlockChain){
 	if needInit {
 		// del current state
 		c.honest = nil
@@ -369,7 +366,7 @@ func (c *Clique) UpdateHonesty(needInit bool, signer common.Address, blkHash com
 	c.honest[signer] += 1
 
 	for k, v := range c.honest {
-		fmt.Println("--------------------signer", k, "honesty", v)
+		fmt.Println("--------------------> signer", k, "honesty", v)
 	}
 }
 
@@ -379,7 +376,7 @@ func (c *Clique) GetHonesty() map[common.Address]uint {
 		temp[k] = v
  	}
 	return temp
-}
+}*/
 
 // verifyCascadingFields verifies all the header fields that are not standalone,
 // rather depend on a batch of previous headers. The caller may optionally pass
@@ -562,7 +559,7 @@ func (c *Clique) verifySeal(chain consensus.ChainReader, header *types.Header, p
 	}
 
 	// added
-	if number % c.config.Epoch == 0 {
+/*	if number % c.config.Epoch == 0 {
 		// init honesty
 		c.honest = nil
 		c.honest = make(map[common.Address]uint)
@@ -573,7 +570,7 @@ func (c *Clique) verifySeal(chain consensus.ChainReader, header *types.Header, p
 	} else {
 		c.UpdateHonesty(false, signer, header.Hash(), header.Number)
 
-	}
+	}*/
 
 	return nil
 }

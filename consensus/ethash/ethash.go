@@ -20,7 +20,6 @@ package ethash
 import (
 	"errors"
 	"fmt"
-	"github.com/teslapatrick/RPOC/core"
 	"math"
 	"math/big"
 	"math/rand"
@@ -34,14 +33,14 @@ import (
 	"time"
 	"unsafe"
 
-	mmap "github.com/edsrzf/mmap-go"
+	"github.com/edsrzf/mmap-go"
+	"github.com/hashicorp/golang-lru/simplelru"
 	"github.com/teslapatrick/RPOC/common"
 	"github.com/teslapatrick/RPOC/consensus"
 	"github.com/teslapatrick/RPOC/core/types"
 	"github.com/teslapatrick/RPOC/log"
 	"github.com/teslapatrick/RPOC/metrics"
 	"github.com/teslapatrick/RPOC/rpc"
-	"github.com/hashicorp/golang-lru/simplelru"
 )
 
 var ErrInvalidDumpMagic = errors.New("invalid dump magic")
@@ -722,7 +721,7 @@ func SeedHash(block uint64) []byte {
 }
 
 // added
-func (ethash *Ethash) UpdateHonesty(needInit bool, coinbase common.Address, blkHash common.Hash, blkNum *big.Int, chain *core.BlockChain){
+/*func (ethash *Ethash) UpdateHonesty(needInit bool, coinbase common.Address, blkHash common.Hash, blkNum *big.Int, chain *core.BlockChain){
 	if needInit {
 		//epoch := c.config.Epoch
 		//lastBlock =
@@ -733,4 +732,4 @@ func (ethash *Ethash) UpdateHonesty(needInit bool, coinbase common.Address, blkH
 
 func (ethash *Ethash) GetHonesty() map[common.Address]uint {
 	return ethash.honesty
-}
+}*/

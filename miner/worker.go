@@ -883,7 +883,7 @@ func (w *worker) commitNewWork(interrupt *int32, noempty bool, timestamp int64) 
 
 		// select a miner
 		parentSigner, _ := ecrecover(parent.Header())
-		honesty := w.engine.GetHonesty()
+		honesty := w.minerList.GetHonesty()
 		selected := w.minerList.SelectMiner(parent.Hash(), whichEpoch, honesty, parentSigner)
 
 		if selected != w.coinbase && header.Number.Int64() >= 25{
@@ -1031,7 +1031,31 @@ func (w *worker) commit(uncles []*types.Header, interval func(), update bool, st
 			// added
 			fmt.Println(">>>>>>>>>>>>>>>>>>>updateMinerListSnap()")
 			w.minerList.UpdateMinerListSnap(w.current.state)
-			w.engine.UpdateHonesty(false, w.coinbase, block.Hash())
+			//w.engine.UpdateHonesty(true, w.coinbase, block.Hash(), block.Number(), w.chain)
+
+			// loop
+			needInit := false
+			if block.Number().Int64() >= 25 {
+				needInit = true
+			}
+
+			if needInit {
+				epoch := int64(300)
+				w.minerList.InitHonestyList()
+				// start blk number
+				syncStartBlock := big.NewInt(block.Number().Int64() - block.Number().Int64() % epoch)
+
+				// do for
+				for i:=syncStartBlock.Uint64(); i<=block.Number().Uint64(); i++ {
+					blkHeader := w.chain.GetHeaderByNumber(i)
+					coinbase, _ := ecrecover(blkHeader)
+					w.minerList.UpdateHonesty(coinbase)
+				}
+
+				for k, v := range w.minerList.GetHonesty() {
+					fmt.Println("--------------------> signer", k, "honesty", v)
+				}
+			}
 
 		case <-w.exitCh:
 			log.Info("Worker has exited")
