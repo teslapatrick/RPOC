@@ -2,7 +2,6 @@ package minerList
 
 import (
 	"encoding/hex"
-	"fmt"
 	"github.com/teslapatrick/RPOC/common"
 	"github.com/teslapatrick/RPOC/core/state"
 	"github.com/teslapatrick/RPOC/log"
@@ -82,7 +81,7 @@ func (ml *MinerList) GetMinerList(state *state.StateDB) []common.Address {
 	for i:=int64(0); i<MinerLen.Int64(); i++ {
 		HashMinerLen := CalculateStateDbIndex(KeyMinerLen, "")
 		m := common.BytesToAddress(state.GetState(MinerListContractAddress, common.HexToHash(IncreaseHexByNum(HashMinerLen, i))).Bytes())
-		fmt.Println(">>>>>>>>>>>>>>>getMinerList", m.String())
+		//fmt.Println(">>>>>>>>>>>>>>>getMinerList", m.String())
 		ml.minerList = append(ml.minerList, m)
 		minerList    = append(minerList, m)
 	}

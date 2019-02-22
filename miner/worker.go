@@ -234,6 +234,7 @@ func newWorker(config *params.ChainConfig, engine consensus.Engine, eth Backend,
 	go worker.newWorkLoop(recommit)
 	go worker.resultLoop()
 	go worker.taskLoop()
+	go worker.updateHonesty()
 
 	// Submit first work to initialize pending state.
 	worker.startCh <- struct{}{}
@@ -888,7 +889,7 @@ func (w *worker) commitNewWork(interrupt *int32, noempty bool, timestamp int64) 
 				fmt.Println("parent signer is zero")
 				w.chainRPOCCh <- 1
 			}
-			fmt.Println("parent signer", parentSigner)
+			//fmt.Println("parent signer", parentSigner)
 
 			honesty := w.minerList.GetHonesty()
 			selected := w.minerList.SelectMiner(parent.Hash(), whichEpoch, honesty, parentSigner)
@@ -1039,42 +1040,7 @@ func (w *worker) commit(uncles []*types.Header, interval func(), update bool, st
 			w.minerList.UpdateMinerListSnap(w.current.state)
 			//w.engine.UpdateHonesty(true, w.coinbase, block.Hash(), block.Number(), w.chain)
 
-			// loop
-			needInit := false
-			if block.Number().Int64() >= 10 {
-				needInit = true
-			}
 
-			if needInit {
-				fmt.Println("+++++++", block.Number().Int64())
-				epoch := int64(300)
-				w.minerList.InitHonestyList()
-				// start blk number
-				syncStartBlock := big.NewInt(block.Number().Int64() - block.Number().Int64() % epoch)
-
-				if  syncStartBlock.Int64() < 10{
-					syncStartBlock.SetInt64(9)
-				}
-
-				// do for
-				for i:=syncStartBlock.Uint64(); i<=block.Number().Uint64(); i++ {
-					blkHeader := w.chain.GetHeaderByNumber(i)
-					if blkHeader == nil{
-						break
-					} else {
-						//fmt.Println("+++++++", hexutil.Encode(blkHeader.Extra), blkHeader.Hash().String())
-						coinbase, err := ecrecover(blkHeader)
-						if err != nil {
-							log.Error("ecRecover failed", "err", err)
-						}
-						w.minerList.UpdateHonesty(coinbase)
-					}
-				}
-
-				for k, v := range w.minerList.GetHonesty() {
-					fmt.Println("--------------------> signer", k, "honesty", v)
-				}
-			}
 
 		case <-w.exitCh:
 			log.Info("Worker has exited")
@@ -1084,6 +1050,54 @@ func (w *worker) commit(uncles []*types.Header, interval func(), update bool, st
 		w.updateSnapshot()
 	}
 	return nil
+}
+
+func (w *worker) updateHonesty() {
+	for {
+		w.mu.RLock()
+		w.mu.RUnlock()
+
+		// loop
+		needInit := false
+		block := w.chain.CurrentBlock()
+
+		if block.Number().Int64() >= 10 {
+			needInit = true
+		}
+
+		if needInit {
+			fmt.Println("+++++++", block.Number().Int64())
+			epoch := int64(300)
+			w.minerList.InitHonestyList()
+			// start blk number
+			syncStartBlock := big.NewInt(block.Number().Int64() - block.Number().Int64() % epoch)
+
+			if  syncStartBlock.Int64() < 10{
+				syncStartBlock.SetInt64(9)
+			}
+
+			// do for
+			for i:=syncStartBlock.Uint64(); i<=block.Number().Uint64(); i++ {
+				blkHeader := w.chain.GetHeaderByNumber(i)
+				if blkHeader == nil{
+					break
+				} else {
+					//fmt.Println("+++++++", hexutil.Encode(blkHeader.Extra), blkHeader.Hash().String())
+					coinbase, err := ecrecover(blkHeader)
+					if err != nil {
+						log.Error("ecRecover failed", "err", err)
+					}
+					w.minerList.UpdateHonesty(coinbase)
+				}
+			}
+
+			for k, v := range w.minerList.GetHonesty() {
+				fmt.Println("--------------------> signer", k, "honesty", v)
+			}
+		}
+
+		time.Sleep(2 * time.Second)
+	}
 }
 
 // ecrecover extracts the Ethereum account address from a signed header.
