@@ -156,14 +156,19 @@ func (ml *MinerList) SelectMiner(preHash common.Hash, epoch int64, honesty map[c
 	randSeed := float64(0)
 	sorted := []common.Address{}
 	hy := honesty
-	if epoch == 0 {
-		sorted = ml.SortMinerList(hy, parentSigner)
-		randSeed = float64(len(sorted)) * SelectMod
+
+	if len(ml.minerList) > 1 {
+		if epoch == 0 {
+			sorted = ml.SortMinerList(hy, parentSigner)
+		} else {
+			sorted = ml.SortMinerList(hy, ml.selected)
+
+		}
 	} else {
-		sorted = ml.SortMinerList(hy, ml.selected)
-		randSeed = float64(len(sorted)) * SelectMod
+		sorted = ml.minerList
 	}
 
+	randSeed = float64(len(sorted)) * SelectMod
 	if randSeed == 0 {
 		log.Error("miner list len is zero.")
 		return common.Address{}

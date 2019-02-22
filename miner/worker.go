@@ -20,7 +20,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/teslapatrick/RPOC/common/hexutil"
 	"github.com/teslapatrick/RPOC/contracts/minerList"
 	"github.com/teslapatrick/RPOC/crypto"
 	"github.com/teslapatrick/RPOC/rlp"
@@ -880,17 +879,17 @@ func (w *worker) commitNewWork(interrupt *int32, noempty bool, timestamp int64) 
 		//fmt.Println("===============>>>>>>>>>>>>>> epoch", whichEpoch, "timestamp", timestamp)
 
 		// select a miner
-		if header.Number.Int64() >= 25 {
+		if header.Number.Int64() >= 10 {
 			// get miner list
 			w.minerList.GetMinerList(w.current.state)
-
-			fmt.Println(">><><>,><<<><<><<><><><NOW25", hexutil.Encode(parent.Extra()))
 
 			parentSigner, _ := ecrecover(parent.Header())
 			if parentSigner == common.BytesToAddress([]byte("0x0000000000000000000000000000000000000000")) {
 				fmt.Println("parent signer is zero")
 				w.chainRPOCCh <- 1
 			}
+			fmt.Println("parent signer", parentSigner)
+
 			honesty := w.minerList.GetHonesty()
 			selected := w.minerList.SelectMiner(parent.Hash(), whichEpoch, honesty, parentSigner)
 
@@ -1042,7 +1041,7 @@ func (w *worker) commit(uncles []*types.Header, interval func(), update bool, st
 
 			// loop
 			needInit := false
-			if block.Number().Int64() >= 25 {
+			if block.Number().Int64() >= 10 {
 				needInit = true
 			}
 
@@ -1052,15 +1051,24 @@ func (w *worker) commit(uncles []*types.Header, interval func(), update bool, st
 				w.minerList.InitHonestyList()
 				// start blk number
 				syncStartBlock := big.NewInt(block.Number().Int64() - block.Number().Int64() % epoch)
-				if syncStartBlock.Int64() < 25 {
-					syncStartBlock.SetInt64(24)
+
+				if  syncStartBlock.Int64() < 10{
+					syncStartBlock.SetInt64(9)
 				}
 
 				// do for
 				for i:=syncStartBlock.Uint64(); i<=block.Number().Uint64(); i++ {
 					blkHeader := w.chain.GetHeaderByNumber(i)
-					coinbase, _ := ecrecover(blkHeader)
-					w.minerList.UpdateHonesty(coinbase)
+					if blkHeader == nil{
+						break
+					} else {
+						//fmt.Println("+++++++", hexutil.Encode(blkHeader.Extra), blkHeader.Hash().String())
+						coinbase, err := ecrecover(blkHeader)
+						if err != nil {
+							log.Error("ecRecover failed", "err", err)
+						}
+						w.minerList.UpdateHonesty(coinbase)
+					}
 				}
 
 				for k, v := range w.minerList.GetHonesty() {
