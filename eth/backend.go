@@ -459,6 +459,10 @@ func (s *Ethereum) StopMining() {
 	s.miner.Stop()
 }
 
+func (s *Ethereum) GetHonesty() map[common.Address]uint {
+	return s.miner.GetHonesty()
+}
+
 func (s *Ethereum) IsMining() bool      { return s.miner.Mining() }
 func (s *Ethereum) Miner() *miner.Miner { return s.miner }
 

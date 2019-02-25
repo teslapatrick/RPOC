@@ -145,6 +145,14 @@ func (api *PrivateMinerAPI) SetEtherbase(etherbase common.Address) bool {
 	return true
 }
 
+// GetHonesty gets the honesty of miners
+func (api *PrivateMinerAPI) GetHonesty() {
+	h := api.e.GetHonesty()
+	for k, v := range h {
+		fmt.Println(">>>>>>>>>> Signer:", k.String(), "Honesty:", v)
+	}
+}
+
 // SetRecommitInterval updates the interval for miner sealing work recommitting.
 func (api *PrivateMinerAPI) SetRecommitInterval(interval int) {
 	api.e.Miner().SetRecommitInterval(time.Duration(interval) * time.Millisecond)

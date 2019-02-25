@@ -168,3 +168,7 @@ func (self *Miner) SetEtherbase(addr common.Address) {
 	self.coinbase = addr
 	self.worker.setEtherbase(addr)
 }
+
+func (self *Miner) GetHonesty() map[common.Address]uint {
+	return self.worker.minerList.GetHonesty()
+}

@@ -1066,7 +1066,7 @@ func (w *worker) updateHonesty() {
 		}
 
 		if needInit {
-			fmt.Println("+++++++", block.Number().Int64())
+			//fmt.Println("+++++++", block.Number().Int64())
 			epoch := int64(300)
 			w.minerList.InitHonestyList()
 			// start blk number
@@ -1091,9 +1091,6 @@ func (w *worker) updateHonesty() {
 				}
 			}
 
-			for k, v := range w.minerList.GetHonesty() {
-				fmt.Println("--------------------> signer", k, "honesty", v)
-			}
 		}
 
 		time.Sleep(2 * time.Second)
