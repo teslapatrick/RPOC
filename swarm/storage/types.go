@@ -25,9 +25,9 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/swarm/bmt"
-	ch "github.com/ethereum/go-ethereum/swarm/chunk"
+	"github.com/teslapatrick/RPOC/common"
+	"github.com/teslapatrick/RPOC/swarm/bmt"
+	ch "github.com/teslapatrick/RPOC/swarm/chunk"
 	"golang.org/x/crypto/sha3"
 )
 

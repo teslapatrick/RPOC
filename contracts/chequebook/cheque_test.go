@@ -24,12 +24,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/accounts/abi/bind/backends"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/contracts/chequebook/contract"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/teslapatrick/RPOC/accounts/abi/bind"
+	"github.com/teslapatrick/RPOC/accounts/abi/bind/backends"
+	"github.com/teslapatrick/RPOC/common"
+	"github.com/teslapatrick/RPOC/contracts/chequebook/contract"
+	"github.com/teslapatrick/RPOC/core"
+	"github.com/teslapatrick/RPOC/crypto"
 )
 
 var (

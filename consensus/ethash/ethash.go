@@ -33,14 +33,14 @@ import (
 	"time"
 	"unsafe"
 
-	mmap "github.com/edsrzf/mmap-go"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/consensus"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/metrics"
-	"github.com/ethereum/go-ethereum/rpc"
+	"github.com/edsrzf/mmap-go"
 	"github.com/hashicorp/golang-lru/simplelru"
+	"github.com/teslapatrick/RPOC/common"
+	"github.com/teslapatrick/RPOC/consensus"
+	"github.com/teslapatrick/RPOC/core/types"
+	"github.com/teslapatrick/RPOC/log"
+	"github.com/teslapatrick/RPOC/metrics"
+	"github.com/teslapatrick/RPOC/rpc"
 )
 
 var ErrInvalidDumpMagic = errors.New("invalid dump magic")
@@ -464,6 +464,9 @@ type Ethash struct {
 	lock      sync.Mutex      // Ensures thread safety for the in-memory caches and mining fields
 	closeOnce sync.Once       // Ensures exit channel will not be closed twice.
 	exitCh    chan chan error // Notification channel to exiting backend threads
+
+	//added
+	honesty map[common.Address]uint
 }
 
 // New creates a full sized ethash PoW scheme and starts a background thread for
@@ -492,6 +495,7 @@ func New(config Config, notify []string, noverify bool) *Ethash {
 		fetchRateCh:  make(chan chan uint64),
 		submitRateCh: make(chan *hashrate),
 		exitCh:       make(chan chan error),
+		honesty:      make(map[common.Address]uint),
 	}
 	go ethash.remote(notify, noverify)
 	return ethash
@@ -715,3 +719,17 @@ func (ethash *Ethash) APIs(chain consensus.ChainReader) []rpc.API {
 func SeedHash(block uint64) []byte {
 	return seedHash(block)
 }
+
+// added
+/*func (ethash *Ethash) UpdateHonesty(needInit bool, coinbase common.Address, blkHash common.Hash, blkNum *big.Int, chain *core.BlockChain){
+	if needInit {
+		//epoch := c.config.Epoch
+		//lastBlock =
+	}
+	ethash.honesty[coinbase] += 1
+
+}
+
+func (ethash *Ethash) GetHonesty() map[common.Address]uint {
+	return ethash.honesty
+}*/

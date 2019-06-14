@@ -19,14 +19,13 @@ package clique
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/ethereum/go-ethereum/log"
 	"sort"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/params"
 	"github.com/hashicorp/golang-lru"
+	"github.com/teslapatrick/RPOC/common"
+	"github.com/teslapatrick/RPOC/core/types"
+	"github.com/teslapatrick/RPOC/ethdb"
+	"github.com/teslapatrick/RPOC/params"
 )
 
 // Vote represents a single vote that an authorized signer made to modify the
@@ -217,11 +216,12 @@ func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
 		if _, ok := snap.Signers[signer]; !ok {
 			return nil, errUnauthorizedSigner
 		}
-		for _, recent := range snap.Recents {
+		// added
+		/*for _, recent := range snap.Recents {
 			if recent == signer {
 				return nil, errRecentlySigned
 			}
-		}
+		}*/
 		snap.Recents[number] = signer
 
 		// Header authorized, discard any previous votes from the signer
@@ -310,7 +310,6 @@ func (s *Snapshot) inturn(number uint64, signer common.Address) bool {
 	for offset < len(signers) && signers[offset] != signer {
 		offset++
 	}
-	log.Info("================>", "signer number", s.Number)
-	log.Info("================>", "signer", signer.String())
-	return (number % uint64(len(signers))) == uint64(offset)
+	//return (number % uint64(len(signers))) == uint64(offset)
+	return true
 }

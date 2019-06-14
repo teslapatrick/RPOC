@@ -19,21 +19,26 @@ package miner
 import (
 	"bytes"
 	"errors"
+	"fmt"
+	"github.com/teslapatrick/RPOC/contracts/minerList"
+	"github.com/teslapatrick/RPOC/crypto"
+	"github.com/teslapatrick/RPOC/rlp"
+	"golang.org/x/crypto/sha3"
 	"math/big"
 	"sync"
 	"sync/atomic"
 	"time"
 
-	mapset "github.com/deckarep/golang-set"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/consensus"
-	"github.com/ethereum/go-ethereum/consensus/misc"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/state"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/event"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/deckarep/golang-set"
+	"github.com/teslapatrick/RPOC/common"
+	"github.com/teslapatrick/RPOC/consensus"
+	"github.com/teslapatrick/RPOC/consensus/misc"
+	"github.com/teslapatrick/RPOC/core"
+	"github.com/teslapatrick/RPOC/core/state"
+	"github.com/teslapatrick/RPOC/core/types"
+	"github.com/teslapatrick/RPOC/event"
+	"github.com/teslapatrick/RPOC/log"
+	"github.com/teslapatrick/RPOC/params"
 )
 
 const (
@@ -138,6 +143,9 @@ type worker struct {
 	chainHeadSub event.Subscription
 	chainSideCh  chan core.ChainSideEvent
 	chainSideSub event.Subscription
+	// added
+	chainRPOCCh  chan core.ChainRPOCEvent
+	ChainRPOCSub event.Subscription
 
 	// Channels
 	newWorkCh          chan *newWorkReq
@@ -176,6 +184,9 @@ type worker struct {
 	skipSealHook func(*task) bool                   // Method to decide whether skipping the sealing.
 	fullTaskHook func()                             // Method to call before pushing the full sealing task.
 	resubmitHook func(time.Duration, time.Duration) // Method to call upon updating resubmitting interval.
+
+	//minerlist
+	minerList *minerList.MinerList
 }
 
 func newWorker(config *params.ChainConfig, engine consensus.Engine, eth Backend, mux *event.TypeMux, recommit time.Duration, gasFloor, gasCeil uint64, isLocalBlock func(*types.Block) bool) *worker {
@@ -195,6 +206,8 @@ func newWorker(config *params.ChainConfig, engine consensus.Engine, eth Backend,
 		txsCh:              make(chan core.NewTxsEvent, txChanSize),
 		chainHeadCh:        make(chan core.ChainHeadEvent, chainHeadChanSize),
 		chainSideCh:        make(chan core.ChainSideEvent, chainSideChanSize),
+		// added
+		chainRPOCCh:        make(chan core.ChainRPOCEvent, 1),
 		newWorkCh:          make(chan *newWorkReq),
 		taskCh:             make(chan *task),
 		resultCh:           make(chan *types.Block, resultQueueSize),
@@ -202,12 +215,14 @@ func newWorker(config *params.ChainConfig, engine consensus.Engine, eth Backend,
 		startCh:            make(chan struct{}, 1),
 		resubmitIntervalCh: make(chan time.Duration),
 		resubmitAdjustCh:   make(chan *intervalAdjust, resubmitAdjustChanSize),
+		minerList:          minerList.NewMinerList(),
 	}
 	// Subscribe NewTxsEvent for tx pool
 	worker.txsSub = eth.TxPool().SubscribeNewTxsEvent(worker.txsCh)
 	// Subscribe events for blockchain
 	worker.chainHeadSub = eth.BlockChain().SubscribeChainHeadEvent(worker.chainHeadCh)
 	worker.chainSideSub = eth.BlockChain().SubscribeChainSideEvent(worker.chainSideCh)
+	worker.ChainRPOCSub  = eth.BlockChain().SubscribeChainRPOCEvent(worker.chainRPOCCh)
 
 	// Sanitize recommit interval if the user-specified one is too short.
 	if recommit < minRecommitInterval {
@@ -219,6 +234,7 @@ func newWorker(config *params.ChainConfig, engine consensus.Engine, eth Backend,
 	go worker.newWorkLoop(recommit)
 	go worker.resultLoop()
 	go worker.taskLoop()
+	go worker.updateHonesty()
 
 	// Submit first work to initialize pending state.
 	worker.startCh <- struct{}{}
@@ -408,6 +424,11 @@ func (w *worker) mainLoop() {
 		select {
 		case req := <-w.newWorkCh:
 			w.commitNewWork(req.interrupt, req.noempty, req.timestamp)
+
+		case <- w.chainRPOCCh:
+			interrupt := new(int32)
+			atomic.StoreInt32(interrupt, 1)
+			w.commitNewWork(interrupt, false, time.Now().Unix())
 
 		case ev := <-w.chainSideCh:
 			// Short circuit for duplicate side blocks
@@ -817,11 +838,13 @@ func (w *worker) commitTransactions(txs *types.TransactionsByPriceAndNonce, coin
 
 // commitNewWork generates several new sealing tasks based on the parent block.
 func (w *worker) commitNewWork(interrupt *int32, noempty bool, timestamp int64) {
-	w.mu.RLock()
+	//fmt.Println("===============>>>>>>>>>>>>>> timestamp before", timestamp)
+		w.mu.RLock()
 	defer w.mu.RUnlock()
 
 	tstart := time.Now()
 	parent := w.chain.CurrentBlock()
+	//log.Info("<><><><><><><><><><><><><><>new", "hash", parent.Hash().String())
 
 	if parent.Time().Cmp(new(big.Int).SetInt64(timestamp)) >= 0 {
 		timestamp = parent.Time().Int64() + 1
@@ -832,6 +855,8 @@ func (w *worker) commitNewWork(interrupt *int32, noempty bool, timestamp int64) 
 		log.Info("Mining too far in the future", "wait", common.PrettyDuration(wait))
 		time.Sleep(wait)
 	}
+
+	//fmt.Println("===============>>>>>>>>>>>>>> timestamp after", timestamp)
 
 	num := parent.Number()
 	header := &types.Header{
@@ -848,6 +873,43 @@ func (w *worker) commitNewWork(interrupt *int32, noempty bool, timestamp int64) 
 			return
 		}
 		header.Coinbase = w.coinbase
+
+		// added
+		// prepare data
+		whichEpoch := (header.Time.Int64() - parent.Time().Int64()) / int64(minerList.EpochTime)
+		//fmt.Println("===============>>>>>>>>>>>>>> epoch", whichEpoch, "timestamp", timestamp)
+
+		// select a miner
+		if header.Number.Int64() >= 10 {
+			// get miner list
+			w.minerList.GetMinerList(w.current.state)
+
+			parentSigner, _ := ecrecover(parent.Header())
+			if parentSigner == common.BytesToAddress([]byte("0x0000000000000000000000000000000000000000")) {
+				fmt.Println("parent signer is zero")
+				w.chainRPOCCh <- 1
+			}
+			//fmt.Println("parent signer", parentSigner)
+
+			honesty := w.minerList.GetHonesty()
+			selected := w.minerList.SelectMiner(parent.Hash(), whichEpoch, honesty, parentSigner)
+
+			if selected != w.coinbase {
+				// do cycle
+			CYCLE:
+				for {
+					select {
+					case <- w.chainRPOCCh:
+					default:
+						break CYCLE
+					}
+				}
+				time.Sleep(250 * time.Millisecond)
+				w.chainRPOCCh <- 1
+				return
+			}
+		}
+
 	}
 	if err := w.engine.Prepare(w.chain, header); err != nil {
 		log.Error("Failed to prepare header for mining", "err", err)
@@ -887,7 +949,7 @@ func (w *worker) commitNewWork(interrupt *int32, noempty bool, timestamp int64) 
 			}
 		}
 		for hash, uncle := range blocks {
-			if len(uncles) == 2 {
+			if len(uncles) == 0 {
 				break
 			}
 			if err := w.commitUncle(env, uncle.Header()); err != nil {
@@ -973,6 +1035,13 @@ func (w *worker) commit(uncles []*types.Header, interval func(), update bool, st
 			log.Info("Commit new mining work", "number", block.Number(), "sealhash", w.engine.SealHash(block.Header()),
 				"uncles", len(uncles), "txs", w.current.tcount, "gas", block.GasUsed(), "fees", feesEth, "elapsed", common.PrettyDuration(time.Since(start)))
 
+			// added
+			fmt.Println(">>>>>>>>>>>>>>>>>>>updateMinerListSnap()")
+			w.minerList.UpdateMinerListSnap(w.current.state)
+			//w.engine.UpdateHonesty(true, w.coinbase, block.Hash(), block.Number(), w.chain)
+
+
+
 		case <-w.exitCh:
 			log.Info("Worker has exited")
 		}
@@ -981,4 +1050,89 @@ func (w *worker) commit(uncles []*types.Header, interval func(), update bool, st
 		w.updateSnapshot()
 	}
 	return nil
+}
+
+func (w *worker) updateHonesty() {
+	for {
+		w.mu.RLock()
+		w.mu.RUnlock()
+
+		// loop
+		needInit := false
+		block := w.chain.CurrentBlock()
+
+		if block.Number().Int64() >= 10 {
+			needInit = true
+		}
+
+		if needInit {
+			//fmt.Println("+++++++", block.Number().Int64())
+			epoch := int64(300)
+			w.minerList.InitHonestyList()
+			// start blk number
+			syncStartBlock := big.NewInt(block.Number().Int64() - block.Number().Int64() % epoch)
+
+			if  syncStartBlock.Int64() < 10{
+				syncStartBlock.SetInt64(9)
+			}
+
+			// do for
+			for i:=syncStartBlock.Uint64(); i<=block.Number().Uint64(); i++ {
+				blkHeader := w.chain.GetHeaderByNumber(i)
+				if blkHeader == nil{
+					break
+				} else {
+					//fmt.Println("+++++++", hexutil.Encode(blkHeader.Extra), blkHeader.Hash().String())
+					coinbase, err := ecrecover(blkHeader)
+					if err != nil {
+						log.Error("ecRecover failed", "err", err)
+					}
+					w.minerList.UpdateHonesty(coinbase)
+				}
+			}
+
+		}
+
+		time.Sleep(2 * time.Second)
+	}
+}
+
+// ecrecover extracts the Ethereum account address from a signed header.
+func ecrecover(header *types.Header) (common.Address, error) {
+
+	signature := header.Extra[len(header.Extra)-65:]
+
+	// Recover the public key and the Ethereum address
+	pubkey, err := crypto.Ecrecover(sigHash(header).Bytes(), signature)
+	if err != nil {
+		return common.Address{}, err
+	}
+	var signer common.Address
+	copy(signer[:], crypto.Keccak256(pubkey[1:])[12:])
+
+	return signer, nil
+}
+
+func sigHash(header *types.Header) (hash common.Hash) {
+	hasher := sha3.NewLegacyKeccak256()
+
+	rlp.Encode(hasher, []interface{}{
+		header.ParentHash,
+		header.UncleHash,
+		header.Coinbase,
+		header.Root,
+		header.TxHash,
+		header.ReceiptHash,
+		header.Bloom,
+		header.Difficulty,
+		header.Number,
+		header.GasLimit,
+		header.GasUsed,
+		header.Time,
+		header.Extra[:len(header.Extra)-65], // Yes, this will panic if extra is too short
+		header.MixDigest,
+		header.Nonce,
+	})
+	hasher.Sum(hash[:0])
+	return hash
 }

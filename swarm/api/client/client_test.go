@@ -25,14 +25,14 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/swarm/storage"
-	"github.com/ethereum/go-ethereum/swarm/storage/feed/lookup"
+	"github.com/teslapatrick/RPOC/swarm/storage"
+	"github.com/teslapatrick/RPOC/swarm/storage/feed/lookup"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/swarm/api"
-	swarmhttp "github.com/ethereum/go-ethereum/swarm/api/http"
-	"github.com/ethereum/go-ethereum/swarm/storage/feed"
+	"github.com/teslapatrick/RPOC/common"
+	"github.com/teslapatrick/RPOC/crypto"
+	"github.com/teslapatrick/RPOC/swarm/api"
+	swarmhttp "github.com/teslapatrick/RPOC/swarm/api/http"
+	"github.com/teslapatrick/RPOC/swarm/storage/feed"
 )
 
 func serverFunc(api *api.API) swarmhttp.TestServer {

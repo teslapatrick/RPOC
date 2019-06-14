@@ -25,20 +25,20 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ethereum/go-ethereum/accounts"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/consensus"
-	"github.com/ethereum/go-ethereum/consensus/misc"
-	"github.com/ethereum/go-ethereum/core/state"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/params"
-	"github.com/ethereum/go-ethereum/rlp"
-	"github.com/ethereum/go-ethereum/rpc"
-	lru "github.com/hashicorp/golang-lru"
+	"github.com/hashicorp/golang-lru"
+	"github.com/teslapatrick/RPOC/accounts"
+	"github.com/teslapatrick/RPOC/common"
+	"github.com/teslapatrick/RPOC/common/hexutil"
+	"github.com/teslapatrick/RPOC/consensus"
+	"github.com/teslapatrick/RPOC/consensus/misc"
+	"github.com/teslapatrick/RPOC/core/state"
+	"github.com/teslapatrick/RPOC/core/types"
+	"github.com/teslapatrick/RPOC/crypto"
+	"github.com/teslapatrick/RPOC/ethdb"
+	"github.com/teslapatrick/RPOC/log"
+	"github.com/teslapatrick/RPOC/params"
+	"github.com/teslapatrick/RPOC/rlp"
+	"github.com/teslapatrick/RPOC/rpc"
 	"golang.org/x/crypto/sha3"
 )
 
@@ -213,6 +213,10 @@ type Clique struct {
 
 	// The fields below are for testing only
 	fakeDiff bool // Skip difficulty verifications
+
+	// added
+	honest    map[common.Address]uint
+	lastAdded map[common.Hash]bool
 }
 
 // New creates a Clique proof-of-authority consensus engine with the initial
@@ -233,6 +237,8 @@ func New(config *params.CliqueConfig, db ethdb.Database) *Clique {
 		recents:    recents,
 		signatures: signatures,
 		proposals:  make(map[common.Address]bool),
+		honest:     make(map[common.Address]uint),
+		lastAdded:  make(map[common.Hash]bool),
 	}
 }
 
@@ -330,6 +336,47 @@ func (c *Clique) verifyHeader(chain consensus.ChainReader, header *types.Header,
 	// All basic checks passed, verify cascading fields
 	return c.verifyCascadingFields(chain, header, parents)
 }
+
+// added
+/*func (c *Clique) UpdateHonesty(needInit bool, signer common.Address, blkHash common.Hash, blkNum *big.Int, chain *core.BlockChain){
+	if needInit {
+		// del current state
+		c.honest = nil
+		c.honest = make(map[common.Address]uint)
+
+		// start blk number
+		syncStartBlock := big.NewInt(int64(blkNum.Uint64() % c.config.Epoch))
+
+		// do for
+		//loop := big.NewInt(0).Sub(blkNum, syncStartBlock).Uint64()
+		for i:=syncStartBlock.Uint64(); i<blkNum.Uint64(); i++ {
+			blkHeader := chain.GetHeaderByNumber(syncStartBlock.Uint64())
+			coinbase, _ := ecrecover(blkHeader, c.signatures)
+			c.honest[coinbase] += 1
+		}
+	}
+
+	if c.lastAdded[blkHash] {
+		log.Error("recently block hash Added")
+		return
+	}
+
+	c.lastAdded[blkHash] = true
+
+	c.honest[signer] += 1
+
+	for k, v := range c.honest {
+		fmt.Println("--------------------> signer", k, "honesty", v)
+	}
+}
+
+func (c *Clique) GetHonesty() map[common.Address]uint {
+	temp := make(map[common.Address]uint)
+	for k, v := range c.honest {
+		temp[k] = v
+ 	}
+	return temp
+}*/
 
 // verifyCascadingFields verifies all the header fields that are not standalone,
 // rather depend on a batch of previous headers. The caller may optionally pass
@@ -491,14 +538,15 @@ func (c *Clique) verifySeal(chain consensus.ChainReader, header *types.Header, p
 	if _, ok := snap.Signers[signer]; !ok {
 		return errUnauthorizedSigner
 	}
-	for seen, recent := range snap.Recents {
+	// added
+	/*for seen, recent := range snap.Recents {
 		if recent == signer {
 			// Signer is among recents, only fail if the current block doesn't shift it out
 			if limit := uint64(len(snap.Signers)/2 + 1); seen > number-limit {
 				return errRecentlySigned
 			}
 		}
-	}
+	}*/
 	// Ensure that the difficulty corresponds to the turn-ness of the signer
 	if !c.fakeDiff {
 		inturn := snap.inturn(header.Number.Uint64(), signer)
@@ -509,6 +557,21 @@ func (c *Clique) verifySeal(chain consensus.ChainReader, header *types.Header, p
 			return errWrongDifficulty
 		}
 	}
+
+	// added
+/*	if number % c.config.Epoch == 0 {
+		// init honesty
+		c.honest = nil
+		c.honest = make(map[common.Address]uint)
+		// init lastadded
+		c.lastAdded = nil
+		c.lastAdded = make(map[common.Hash]bool)
+		fmt.Println("initinitinitinitinitinit")
+	} else {
+		c.UpdateHonesty(false, signer, header.Hash(), header.Number)
+
+	}*/
+
 	return nil
 }
 
@@ -626,8 +689,9 @@ func (c *Clique) Seal(chain consensus.ChainReader, block *types.Block, results c
 	if _, authorized := snap.Signers[signer]; !authorized {
 		return errUnauthorizedSigner
 	}
+	// added
 	// If we're amongst the recent signers, wait for the next block
-	for seen, recent := range snap.Recents {
+	/*for seen, recent := range snap.Recents {
 		if recent == signer {
 			// Signer is among recents, only wait if the current block doesn't shift it out
 			if limit := uint64(len(snap.Signers)/2 + 1); number < limit || seen > number-limit {
@@ -635,7 +699,7 @@ func (c *Clique) Seal(chain consensus.ChainReader, block *types.Block, results c
 				return nil
 			}
 		}
-	}
+	}*/
 	// Sweet, the protocol permits us to sign the block, wait for our time
 	delay := time.Unix(header.Time.Int64(), 0).Sub(time.Now()) // nolint: gosimple
 	if header.Difficulty.Cmp(diffNoTurn) == 0 {

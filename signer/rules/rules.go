@@ -22,12 +22,12 @@ import (
 	"os"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/internal/ethapi"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/signer/core"
-	"github.com/ethereum/go-ethereum/signer/rules/deps"
-	"github.com/ethereum/go-ethereum/signer/storage"
+	"github.com/teslapatrick/RPOC/common"
+	"github.com/teslapatrick/RPOC/internal/ethapi"
+	"github.com/teslapatrick/RPOC/log"
+	"github.com/teslapatrick/RPOC/signer/core"
+	"github.com/teslapatrick/RPOC/signer/rules/deps"
+	"github.com/teslapatrick/RPOC/signer/storage"
 	"github.com/robertkrimen/otto"
 )
 
